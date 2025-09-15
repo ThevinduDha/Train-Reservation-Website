@@ -2,15 +2,20 @@ package lk.sliit.lankarail.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
  * Permissive security config for development/demo.
- * Keeps the JWT classes in the project (so you can re-enable them later),
- * but allows all HTTP requests while you build the frontend and CRUDs.
+ * - allows all requests (no enforced auth)
+ * - still exposes AuthenticationManager and PasswordEncoder beans so AuthController
+ *   and other security components can be autowired and used if needed.
  *
- * IMPORTANT: Do NOT use this configuration in production.
+ * IMPORTANT: Do not use this in production.
  */
 @Configuration
 public class SecurityConfig {
@@ -20,6 +25,19 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+
         return http.build();
+    }
+
+    // make AuthenticationManager available for AuthController / login code
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    // expose a PasswordEncoder bean (used by your UserServiceImpl or future code)
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
