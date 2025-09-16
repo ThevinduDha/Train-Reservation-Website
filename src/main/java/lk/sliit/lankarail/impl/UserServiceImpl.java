@@ -27,13 +27,14 @@ public class UserServiceImpl implements UserService {
         }
         user.setPassword(encoder.encode(user.getPassword())); // hash password
         if (user.getRole() == null) user.setRole("ROLE_MEMBER"); // default role
-        return repo.save(user);
+        User saved = repo.save(user);
+        saved.setPassword(null);
+        return saved;
     }
 
     @Override
     public List<User> findAll() {
         List<User> users = repo.findAll();
-        // hide passwords before returning
         users.forEach(u -> u.setPassword(null));
         return users;
     }
