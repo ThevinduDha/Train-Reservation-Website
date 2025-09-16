@@ -1,5 +1,6 @@
 package lk.sliit.lankarail.controller;
 
+import jakarta.validation.Valid;
 import lk.sliit.lankarail.model.User;
 import lk.sliit.lankarail.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -17,25 +18,25 @@ public class UserController {
         this.service = service;
     }
 
-    // GET /api/users
+    // List all users
     @GetMapping
     public ResponseEntity<List<User>> all() {
         return ResponseEntity.ok(service.findAll());
     }
 
-    // GET /api/users/{id}
+    // Get one user
     @GetMapping("/{id}")
     public ResponseEntity<User> one(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
-    // PUT /api/users/{id}
+    // Update user
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<User> update(@PathVariable Long id, @Valid @RequestBody User user) {
         return ResponseEntity.ok(service.update(id, user));
     }
 
-    // DELETE /api/users/{id}
+    // Delete user
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         service.delete(id);
