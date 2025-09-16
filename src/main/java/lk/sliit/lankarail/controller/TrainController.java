@@ -1,5 +1,6 @@
 package lk.sliit.lankarail.controller;
 
+import jakarta.validation.Valid;
 import lk.sliit.lankarail.model.Train;
 import lk.sliit.lankarail.service.TrainService;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class TrainController {
 
     // Create
     @PostMapping
-    public ResponseEntity<Train> create(@RequestBody Train train) {
+    public ResponseEntity<Train> create(@Valid @RequestBody Train train) {
         return ResponseEntity.ok(service.create(train));
     }
 
@@ -37,7 +38,7 @@ public class TrainController {
 
     // Update
     @PutMapping("/{id}")
-    public ResponseEntity<Train> update(@PathVariable Long id, @RequestBody Train train) {
+    public ResponseEntity<Train> update(@PathVariable Long id, @Valid @RequestBody Train train) {
         return ResponseEntity.ok(service.update(id, train));
     }
 

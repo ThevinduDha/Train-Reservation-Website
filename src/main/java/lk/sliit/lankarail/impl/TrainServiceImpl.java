@@ -36,8 +36,7 @@ public class TrainServiceImpl implements TrainService {
         Train existing = findById(id);
         if (train.getName() != null) existing.setName(train.getName());
         if (train.getType() != null) existing.setType(train.getType());
-        // only update capacity if provided (non-zero indicates provided)
-        existing.setCapacity(train.getCapacity());
+        if (train.getCapacity() != null) existing.setCapacity(train.getCapacity());
         return repo.save(existing);
     }
 
