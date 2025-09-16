@@ -1,5 +1,6 @@
 package lk.sliit.lankarail.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +21,7 @@ public class User {
 
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // prevents password showing in responses
     private String password;
 
     @NotBlank(message = "Role is required")
@@ -31,7 +33,7 @@ public class User {
 
     public User() {}
 
-    // getters/setters
+    // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
