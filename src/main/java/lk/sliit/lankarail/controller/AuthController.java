@@ -1,5 +1,6 @@
 package lk.sliit.lankarail.controller;
 
+import jakarta.validation.Valid;
 import lk.sliit.lankarail.model.User;
 import lk.sliit.lankarail.payload.JwtResponse;
 import lk.sliit.lankarail.payload.LoginRequest;
@@ -14,13 +15,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Simple, robust AuthController that exposes:
- *  - POST /api/auth/register
- *  - POST /api/auth/login
- *
- * Notes:
- *  - Login expects Content-Type: application/json and a JSON body matching LoginRequest.
- *  - This version uses AuthenticationManager to authenticate and JwtUtils to generate token.
+ * AuthController:
+ * - POST /api/auth/register    -> register new user (validates input via @Valid)
+ * - POST /api/auth/login       -> authenticate and (optionally) return a token
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -41,13 +38,22 @@ public class AuthController {
         this.userDetailsService = userDetailsService;
     }
 
+    /**
+     * Register new user.
+     * @param user incoming JSON mapped to User entity — validated because of @Valid
+     */
     @PostMapping(path = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@Valid @RequestBody User user) {
         User created = userService.register(user);
+        // don't return password
         created.setPassword(null);
         return ResponseEntity.ok(created);
     }
 
+    /**
+     * Login — expects JSON with { "email": "...", "password": "..." }.
+     * Uses AuthenticationManager to authenticate and JwtUtils to generate a token (if enabled).
+     */
     @PostMapping(path = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
@@ -58,8 +64,7 @@ public class AuthController {
             UserDetails principal = (UserDetails) authentication.getPrincipal();
             String token = jwtUtils.generateJwtToken(principal.getUsername());
 
-            // get user entity for id and role (optional)
-            // If you want id, you can fetch user by email here from repo via userService
+            // Return token + role info (id omitted here — fetch from repo if you want)
             return ResponseEntity.ok(new JwtResponse(token, null, principal.getUsername(),
                     principal.getAuthorities().stream().findFirst().map(Object::toString).orElse("ROLE_MEMBER")));
         } catch (BadCredentialsException ex) {
