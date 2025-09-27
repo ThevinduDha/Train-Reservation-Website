@@ -43,4 +43,21 @@ public class BookingController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/pay")
+    public ResponseEntity<Booking> pay(@PathVariable Long id) {
+        return ResponseEntity.ok(service.markAsPaid(id));
+    }
+
+    @PutMapping("/{id}/confirm-payment")
+    public ResponseEntity<Booking> confirmPayment(@PathVariable Long id) {
+        // later: get admin name from logged-in user
+        return ResponseEntity.ok(service.confirmPayment(id, "AdminUser"));
+    }
+
+    @PutMapping("/{id}/reject-payment")
+    public ResponseEntity<Booking> rejectPayment(@PathVariable Long id) {
+        return ResponseEntity.ok(service.rejectPayment(id, "AdminUser"));
+    }
+
 }
