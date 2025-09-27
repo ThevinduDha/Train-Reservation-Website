@@ -52,4 +52,19 @@ public class Booking {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+
+    // inside Booking.java
+    @Column(nullable = false)
+    private String paymentStatus = "PENDING"; // PENDING, CONFIRMED, REJECTED
+
+    private String confirmedByAdmin; // store admin email or id (optional)
+
+    // getters/setters
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public String getConfirmedByAdmin() { return confirmedByAdmin; }
+    public void setConfirmedByAdmin(String confirmedByAdmin) { this.confirmedByAdmin = confirmedByAdmin; }
+
 }
