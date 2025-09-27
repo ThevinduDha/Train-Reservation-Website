@@ -1,133 +1,96 @@
-// auth.js — handles login & signup forms, client validations, animations.
-// Save this to: src/main/resources/static/js/auth.js
+// simple frontend auth helpers for login/signup (used by login.html & signup.html)
 
-(function () {
-  // Helpers
-  function el(id){ return document.getElementById(id); }
-  function showAlert(targetId, type, message) {
-    const container = el(targetId);
-    if (!container) return;
-    container.innerHTML = `
-      <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    `;
+// Show toast-style messages (very small)
+function showMessage(msg, type = 'info') {
+  alert(msg); // simple for now. You can replace with nicer UI.
+}
+
+// validate email via simple regex
+function isValidEmail(e) {
+  return /\S+@\S+\.\S+/.test(e);
+}
+
+/* --------- registration --------- */
+async function authRegister() {
+  const email = document.getElementById('signupEmail').value.trim();
+  const pwd = document.getElementById('signupPassword').value;
+  const pwd2 = document.getElementById('signupConfirm').value;
+
+  // client-side validation
+  if (!isValidEmail(email)) {
+    showMessage('Please enter a valid email.');
+    return;
+  }
+  if (pwd.length < 8) {
+    showMessage('Password must be at least 8 characters.');
+    return;
+  }
+  if (pwd !== pwd2) {
+    showMessage('Passwords do not match.');
+    return;
   }
 
-  function setButtonLoading(btn, loading){
-    const spinner = btn.querySelector('.spinner-border');
-    const text = btn.querySelector('.btn-text');
-    if (loading) {
-      spinner.classList.remove('d-none');
-      btn.disabled = true;
-      if (text) text.style.opacity = '0.8';
-    } else {
-      spinner.classList.add('d-none');
-      btn.disabled = false;
-      if (text) text.style.opacity = '1';
-    }
-  }
+  const payload = { email, password: pwd };
 
-  // POST JSON helper
-  async function postJson(url, payload){
-    const res = await fetch(url, {
+  try {
+    const resp = await fetch('/api/auth/register', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const body = await res.text();
-    let parsed = null;
-    try { parsed = JSON.parse(body); } catch(e) { parsed = body; }
-    return { ok: res.ok, status: res.status, body: parsed };
+
+    if (!resp.ok) {
+      const txt = await resp.text();
+      showMessage('Registration failed: ' + txt);
+      return;
+    }
+
+    const data = await resp.json();
+    showMessage('Registered successfully. You can now sign in.');
+    // redirect to sign-in
+    window.location.href = '/login.html';
+  } catch (err) {
+    console.error(err);
+    showMessage('Registration error: ' + err.message);
+  }
+}
+
+/* --------- login --------- */
+async function authLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd = document.getElementById('loginPassword').value;
+
+  if (!isValidEmail(email)) {
+    showMessage('Please enter a valid email.');
+    return;
+  }
+  if (pwd.length < 8) {
+    showMessage('Password must be at least 8 characters.');
+    return;
   }
 
-  // Login form
-  const loginForm = el('loginForm');
-  if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = el('email').value.trim();
-      const password = el('password').value;
+  const payload = { email, password: pwd };
 
-      if (!email || !password) {
-        showAlert('alert-placeholder', 'warning', 'Please enter email and password.');
-        return;
-      }
-
-      const btn = el('loginBtn');
-      setButtonLoading(btn, true);
-
-      const result = await postJson('/api/auth/login', { email, password });
-
-      setButtonLoading(btn, false);
-
-      if (result.ok) {
-        // expected: { token: "...", email: "...", role: "ROLE_MEMBER" }
-        const token = result.body && result.body.token ? result.body.token : null;
-        if (token) {
-          // store token localStorage (you can later send it in Authorization header)
-          localStorage.setItem('lr_token', token);
-        }
-        showAlert('alert-placeholder', 'success', 'Login successful!');
-        // optional: redirect to dashboard/home after short delay
-        setTimeout(()=>{ window.location.href = '/'; }, 900);
-      } else {
-        let message = 'Login failed';
-        if (result.body) {
-          if (typeof result.body === 'string') message = result.body;
-          else if (result.body.message) message = result.body.message;
-          else if (result.body.error) message = result.body.error;
-        }
-        showAlert('alert-placeholder', 'danger', message);
-      }
+  try {
+    const resp = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
+
+    if (!resp.ok) {
+      const txt = await resp.text();
+      showMessage('Login failed: ' + txt);
+      return;
+    }
+
+    const data = await resp.json();
+    // if you get token, you can store it: localStorage.setItem('token', data.token)
+    showMessage('Login successful.');
+    // Redirect to your app landing page — change if you have a dashboard route
+    window.location.href = '/';
+  } catch (err) {
+    console.error(err);
+    showMessage('Login error: ' + err.message);
   }
-
-  // Signup form
-  const signupForm = el('signupForm');
-  if (signupForm) {
-    signupForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = el('su-email').value.trim();
-      const password = el('su-password').value;
-
-      // client validations
-      if (!email || !password) {
-        showAlert('alert-placeholder', 'warning', 'Email and password are required.');
-        return;
-      }
-      if (password.length < 8) {
-        showAlert('alert-placeholder', 'warning', 'Password must be at least 8 characters.');
-        return;
-      }
-
-      const btn = el('signupBtn');
-      setButtonLoading(btn, true);
-
-      const result = await postJson('/api/auth/register', { email, password });
-
-      setButtonLoading(btn, false);
-
-      if (result.ok) {
-        showAlert('alert-placeholder', 'success', 'Account created — you can sign in now.');
-        setTimeout(()=>{ window.location.href = '/login.html'; }, 1000);
-      } else {
-        let message = 'Registration failed';
-        if (result.body) {
-          if (typeof result.body === 'string') message = result.body;
-          else if (result.body.message) message = result.body.message;
-          else if (result.body.errors) message = (Array.isArray(result.body.errors) ? result.body.errors.join(', ') : JSON.stringify(result.body.errors));
-        }
-        showAlert('alert-placeholder', 'danger', message);
-      }
-    });
-  }
-
-  // attach Authorization header helper for other pages:
-  window.getAuthHeaders = function(){
-    const tok = localStorage.getItem('lr_token');
-    return tok ? { 'Authorization': 'Bearer ' + tok } : {};
-  };
-
-})();
+}
