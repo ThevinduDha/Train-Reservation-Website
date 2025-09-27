@@ -10,4 +10,10 @@ public interface BookingService {
     List<Booking> findAll();
     Booking update(Long id, Booking booking); // mainly update seats or status
     void delete(Long id);
+
+    Booking markAsPaid(Long id);
+    Booking confirmPayment(Long id, String adminName);
+    Booking rejectPayment(Long id, String adminName);
+
 }
+
