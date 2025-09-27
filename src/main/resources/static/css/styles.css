@@ -1,0 +1,77 @@
+/* styles.css - light, modern look + animations */
+
+:root{
+  --primary: #1976d2;
+  --accent: #0d6efd;
+  --muted: #6c757d;
+  --card-shadow: 0 8px 24px rgba(18, 38, 63, .08);
+}
+
+body.auth-page{
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  min-height: 100vh;
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* navbar */
+.navbar .logo{
+  height: 36px;
+}
+
+/* card */
+.auth-card{
+  border: 0;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+}
+
+/* hero image */
+.hero img{
+  object-fit: cover;
+  height: 100%;
+  max-height: 420px;
+}
+
+/* animated appearance for cards */
+.animate-card{
+  transform: translateY(20px);
+  opacity: 0;
+  animation: cardIn .6s ease forwards;
+}
+
+@keyframes cardIn {
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* hero slide-in */
+.animate-hero{
+  transform: translateX(60px);
+  opacity: 0;
+  animation: heroIn .8s ease .15s forwards;
+}
+@keyframes heroIn {
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* button micro animation */
+.btn-animate{
+  position: relative;
+  overflow: hidden;
+  transition: transform .12s ease;
+}
+.btn-animate:active{ transform: scale(.995); }
+.btn-animate .btn-text { transition: transform .18s ease; }
+
+/* simple success / error alerts added by JS */
+.alert {
+  border-radius: 8px;
+}
+
+/* responsive tweaks */
+@media (max-width: 991px) {
+  .hero { display: none; }
+}
+
+/* small helper for hidden spinner toggles */
+.d-none { display: none !important; }
