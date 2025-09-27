@@ -1,77 +1,120 @@
-/* styles.css - light, modern look + animations */
-
-:root{
-  --primary: #1976d2;
-  --accent: #0d6efd;
-  --muted: #6c757d;
-  --card-shadow: 0 8px 24px rgba(18, 38, 63, .08);
-}
-
-body.auth-page{
-  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
-  min-height: 100vh;
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+/* ----- base ----- */
+* { box-sizing: border-box; }
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #222;
+  background: #f8fafc;
 }
 
 /* navbar */
-.navbar .logo{
-  height: 36px;
+.navbar { padding: .6rem 1rem; background: transparent; }
+.logo-img { height: 40px; display: block; }
+.brand-text { font-weight: 700; color: #0b4f4f; font-size: 1rem; }
+
+/* ---------- FULLSCREEN HERO ---------- */
+/* We use a fixed full-viewport background so both pages look identical size-wise */
+.hero-bg {
+  position: fixed;
+  inset: 0;                     /* top:0; right:0; bottom:0; left:0; */
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  filter: none;
 }
 
-/* card */
-.auth-card{
-  border: 0;
-  border-radius: 12px;
-  box-shadow: var(--card-shadow);
-  overflow: hidden;
+/* subtle dark overlay so card text reads nicely */
+.hero-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.06); /* tiny wash to keep bright images readable */
+  z-index: 1;
+  pointer-events: none;
 }
 
-/* hero image */
-.hero img{
-  object-fit: cover;
-  height: 100%;
-  max-height: 420px;
-}
-
-/* animated appearance for cards */
-.animate-card{
-  transform: translateY(20px);
-  opacity: 0;
-  animation: cardIn .6s ease forwards;
-}
-
-@keyframes cardIn {
-  to { transform: translateY(0); opacity: 1; }
-}
-
-/* hero slide-in */
-.animate-hero{
-  transform: translateX(60px);
-  opacity: 0;
-  animation: heroIn .8s ease .15s forwards;
-}
-@keyframes heroIn {
-  to { transform: translateX(0); opacity: 1; }
-}
-
-/* button micro animation */
-.btn-animate{
+/* main container that ensures content flows above the hero */
+.page-inner {
   position: relative;
-  overflow: hidden;
-  transition: transform .12s ease;
-}
-.btn-animate:active{ transform: scale(.995); }
-.btn-animate .btn-text { transition: transform .18s ease; }
-
-/* simple success / error alerts added by JS */
-.alert {
-  border-radius: 8px;
+  z-index: 2; /* above hero */
+  min-height: 100vh;
 }
 
-/* responsive tweaks */
+/* layout wrapper (keeps nav at top, card placed to right center) */
+.auth-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 72px);
+  padding: 32px 64px;
+}
+
+/* center inner grid to allow left spacing while card sits right */
+.auth-grid {
+  width: 100%;
+  max-width: 1400px; /* controls how wide the hero feels */
+  display: grid;
+  grid-template-columns: 1fr 480px;
+  gap: 40px;
+  align-items: center;
+}
+
+/* ensure left column is empty (just spacing) — hero is full-screen; right column holds card */
+.auth-left-space {}
+
+/* right column alignment: keep card at vertical center, but slightly to the right with some offset */
+.auth-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 20px;
+}
+
+/* GLASS CARD — smaller and centered vertically */
+.glass-card {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+  padding: 10px;
+  background: rgba(255,255,255,0.28);
+  -webkit-backdrop-filter: blur(10px) saturate(110%);
+  backdrop-filter: blur(10px) saturate(110%);
+  box-shadow: 0 18px 50px rgba(21,31,54,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+}
+
+/* card inner spacing */
+.card-inner { padding: 22px 28px; }
+.card-title { margin: 0 0 .4rem 0; font-size: 1.5rem; font-weight: 700; }
+.text-muted.small { color: #6c757d; font-size: .95rem; }
+
+/* form controls */
+.form-control { border-radius: 8px; padding: 10px 12px; }
+.btn-primary {
+  background: linear-gradient(180deg, #0d6efd, #0a58ca);
+  border: none;
+  padding: 12px 14px;
+  font-size: 1rem;
+  border-radius: 10px;
+  color: #fff;
+}
+.btn-primary:hover { transform: translateY(-2px); }
+
+/* animation for card entrance */
+.animate-fade-in {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 520ms cubic-bezier(.22,.9,.3,1) forwards;
+}
+@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+/* responsive: on small screens stack content and ensure hero still covers */
 @media (max-width: 991px) {
-  .hero { display: none; }
+  .auth-grid { grid-template-columns: 1fr; gap: 18px; }
+  .auth-right { justify-content: center; padding-right: 0; }
+  .glass-card { max-width: 520px; }
+  .auth-wrapper { padding: 18px; }
 }
 
-/* small helper for hidden spinner toggles */
-.d-none { display: none !important; }
+/* accessibility focus */
+input:focus, button:focus { outline: 3px solid rgba(13,110,253,0.12); outline-offset: 2px; }
