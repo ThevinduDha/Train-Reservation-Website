@@ -9,33 +9,35 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * Permissive security config for development/demo.
- * - allows all requests (no enforced auth)
- * - still exposes AuthenticationManager and PasswordEncoder beans so AuthController
- *   and other security components can be autowired and used if needed.
- *
- * IMPORTANT: Do not use this in production.
- */
 @Configuration
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+                .csrf(csrf -> csrf.disable()) // disable CSRF for API testing (enable later in production)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**", "/css/**", "/js/**", "/images/**", "/login.html", "/signup.html").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // admin endpoints restricted
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginProcessingUrl("/api/auth/login") // Spring Security will handle session creation
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/api/auth/logout")
+                        .permitAll()
+                );
 
         return http.build();
     }
 
-    // make AuthenticationManager available for AuthController / login code
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // expose a PasswordEncoder bean (used by your UserServiceImpl or future code)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
