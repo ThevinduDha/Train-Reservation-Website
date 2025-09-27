@@ -113,4 +113,31 @@ public class BookingServiceImpl implements BookingService {
     public void delete(Long id) {
         repo.deleteById(id);
     }
+
+    @Override
+    public Booking markAsPaid(Long id) {
+        Booking booking = findById(id);
+        if ("CONFIRMED".equals(booking.getPaymentStatus())) {
+            throw new RuntimeException("Payment already confirmed");
+        }
+        booking.setPaymentStatus("PENDING");
+        return repo.save(booking);
+    }
+
+    @Override
+    public Booking confirmPayment(Long id, String adminName) {
+        Booking booking = findById(id);
+        booking.setPaymentStatus("CONFIRMED");
+        booking.setConfirmedByAdmin(adminName);
+        return repo.save(booking);
+    }
+
+    @Override
+    public Booking rejectPayment(Long id, String adminName) {
+        Booking booking = findById(id);
+        booking.setPaymentStatus("REJECTED");
+        booking.setConfirmedByAdmin(adminName);
+        return repo.save(booking);
+    }
+
 }
