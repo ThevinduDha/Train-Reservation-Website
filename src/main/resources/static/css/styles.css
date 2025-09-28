@@ -8,61 +8,72 @@ html, body {
   background: #f8fafc;
 }
 
-/* navbar */
-.navbar { padding: .6rem 1rem; background: transparent; }
+/* TOPBAR: white strip that sits above hero */
+.topbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 64px;
+  background: rgba(255,255,255,0.95); /* mostly white */
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  z-index: 50;
+}
+
+/* navbar inside the topbar (keeps style) */
+.topbar .navbar { padding: 0; width:100%; background: transparent; }
+
+/* small spacing so content doesn't hide behind topbar */
+.content-offset { padding-top: 72px; }
+
+/* navbar logo & brand */
 .logo-img { height: 40px; display: block; }
 .brand-text { font-weight: 700; color: #0b4f4f; font-size: 1rem; }
 
 /* ---------- FULLSCREEN HERO ---------- */
-/* We use a fixed full-viewport background so both pages look identical size-wise */
 .hero-bg {
   position: fixed;
-  inset: 0;                     /* top:0; right:0; bottom:0; left:0; */
+  inset: 0;
   background-size: cover;
   background-position: center;
   z-index: 0;
   filter: none;
 }
-
-/* subtle dark overlay so card text reads nicely */
 .hero-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255,255,255,0.06); /* tiny wash to keep bright images readable */
-  z-index: 1;
+  background: rgba(0,0,0,0.18);
+  z-index: 5;
   pointer-events: none;
 }
 
-/* main container that ensures content flows above the hero */
+/* main content above hero */
 .page-inner {
   position: relative;
-  z-index: 2; /* above hero */
+  z-index: 10;
   min-height: 100vh;
 }
 
-/* layout wrapper (keeps nav at top, card placed to right center) */
+/* layout wrapper */
 .auth-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: calc(100vh - 72px);
-  padding: 32px 64px;
+  padding: 32px 48px;
 }
-
-/* center inner grid to allow left spacing while card sits right */
 .auth-grid {
   width: 100%;
-  max-width: 1400px; /* controls how wide the hero feels */
+  max-width: 1400px;
   display: grid;
   grid-template-columns: 1fr 480px;
   gap: 40px;
   align-items: center;
 }
-
-/* ensure left column is empty (just spacing) — hero is full-screen; right column holds card */
 .auth-left-space {}
-
-/* right column alignment: keep card at vertical center, but slightly to the right with some offset */
 .auth-right {
   display: flex;
   align-items: center;
@@ -70,7 +81,7 @@ html, body {
   padding-right: 20px;
 }
 
-/* GLASS CARD — smaller and centered vertically */
+/* GLASS CARD */
 .glass-card {
   width: 100%;
   max-width: 420px;
@@ -100,6 +111,30 @@ html, body {
 }
 .btn-primary:hover { transform: translateY(-2px); }
 
+/* admin portal button (outline red) */
+.btn-admin-outline {
+  border: 1.5px solid rgba(220,53,69,0.9);
+  color: rgba(220,53,69,0.95);
+  background: transparent;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+/* ✅ NEW: solid red admin button */
+.btn-admin {
+  background-color: #dc3545;   /* Bootstrap red */
+  border: none;
+  color: #fff !important;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 10px 14px;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+.btn-admin:hover {
+  transform: translateY(-2px);
+  filter: brightness(0.95);
+}
+
 /* animation for card entrance */
 .animate-fade-in {
   opacity: 0;
@@ -108,14 +143,15 @@ html, body {
 }
 @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
-/* responsive: on small screens stack content and ensure hero still covers */
+/* responsive */
 @media (max-width: 991px) {
   .auth-grid { grid-template-columns: 1fr; gap: 18px; }
   .auth-right { justify-content: center; padding-right: 0; }
   .glass-card { max-width: 520px; }
   .auth-wrapper { padding: 18px; }
+  .topbar { height: 56px; }
+  .content-offset { padding-top: 64px; }
 }
 
-/* accessibility focus */
+/* accessibility */
 input:focus, button:focus { outline: 3px solid rgba(13,110,253,0.12); outline-offset: 2px; }
-
