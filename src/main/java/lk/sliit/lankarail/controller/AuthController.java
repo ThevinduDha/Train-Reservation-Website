@@ -7,11 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -43,7 +45,7 @@ public class AuthController {
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        if (user.getRole() == null) {
+        if (user.getRole() == null || user.getRole().isBlank()) {
             user.setRole("ROLE_MEMBER"); // default role
         }
         user.setEnabled(true);
@@ -64,17 +66,27 @@ public class AuthController {
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            return ResponseEntity.ok(Map.of(
-                    "message", "Login successful",
-                    "email", body.get("email"),
-                    "roles", authentication.getAuthorities()
-            ));
+            // build simple response: token placeholder + role(s)
+            List<String> roles = authentication.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+
+            String primaryRole = roles.isEmpty() ? "ROLE_MEMBER" : roles.get(0);
+
+            Map<String, Object> resp = new HashMap<>();
+            resp.put("message", "Login successful");
+            resp.put("email", body.get("email"));
+            resp.put("roles", roles);
+            resp.put("role", primaryRole);   // convenient single role for frontend
+            resp.put("token", "");           // placeholder if you later add JWT
+
+            return ResponseEntity.ok(resp);
         } catch (Exception e) {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
         }
     }
 
     /**
-     * Logout is handled automatically by Spring at /api/auth/logout
+     * Logout is handled automatically by Spring at /api/auth/logout (if you wire it up)
      */
 }

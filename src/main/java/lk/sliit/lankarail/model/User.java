@@ -21,10 +21,10 @@ public class User {
 
     @NotBlank(message = "Password is required")
     @Size(min = 6, message = "Password must be at least 6 characters")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // prevents password showing in responses
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @NotBlank(message = "Role is required")
+    // Make role optional: remove @NotBlank so register can set a default role when missing
     private String role;  // "ROLE_MEMBER" or "ROLE_ADMIN"
 
     private boolean enabled = true;
