@@ -1,59 +1,67 @@
 // passenger-dashboard.js
 // Fetch and display bookings, allow create and logout
 
-// Utility: show a simple message
 function showMsg(msg) { alert(msg); }
 
-// Read stored role/email if set by your auth.js
-const savedRole = (() => {
-  try { return JSON.parse(localStorage.getItem('lankarail_role') || 'null'); } catch(e){ return null; }
-})();
-const savedEmail = localStorage.getItem('lankarail_email') || null; // optional store in auth.js
-
-// update topbar user info
 document.addEventListener('DOMContentLoaded', function() {
   const userInfo = document.getElementById('userInfo');
-  if (savedEmail) userInfo.textContent = savedEmail + (savedRole ? ' • ' + savedRole.join(', ') : '');
-  else if (savedRole) userInfo.textContent = savedRole.join(', ');
-  else userInfo.textContent = '';
+  const storedEmail = localStorage.getItem('lankarail_email') || '';
+  const storedRoles = JSON.parse(localStorage.getItem('lankarail_role') || '[]');
+  if (userInfo) userInfo.textContent = storedEmail ? (storedEmail + (storedRoles.length ? ' • ' + storedRoles.join(', ') : '')) : (storedRoles.join(', ') || '');
 
-  // attach handlers
-  document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-  document.getElementById('newBookingBtn').addEventListener('click', openCreateModal);
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
 
-  // form submit
-  document.getElementById('createBookingForm').addEventListener('submit', handleCreateBooking);
+  const newBookingBtn = document.getElementById('newBookingBtn');
+  if (newBookingBtn) newBookingBtn.addEventListener('click', openCreateModal);
 
-  // load bookings
-  loadBookings();
+  const createForm = document.getElementById('createBookingForm');
+  if (createForm) createForm.addEventListener('submit', handleCreateBooking);
+
+  if (document.getElementById('bookingsArea')) {
+    loadBookings();
+  }
 });
+
+function authHeaders() {
+  const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' };
+  const token = localStorage.getItem('lankarail_token');
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  return headers;
+}
 
 async function loadBookings() {
   const area = document.getElementById('bookingsArea');
   const loading = document.getElementById('loadingMsg');
+  if (!area) return;
   area.innerHTML = '';
-  loading && (loading.style.display = 'block');
+  if (loading) loading.style.display = 'block';
 
   try {
-    // adjust endpoint if different
     const res = await fetch('/api/bookings', {
       method: 'GET',
-      headers: { 'Accept': 'application/json' },
-      credentials: 'same-origin' // send session cookie for Spring session-based login
+      headers: authHeaders(),
+      credentials: 'same-origin'
     });
+
+    if (res.status === 401) {
+      // not authenticated — go to login
+      window.location.href = '/login.html';
+      return;
+    }
 
     if (!res.ok) {
       const txt = await res.text();
-      loading.textContent = 'Failed to load: ' + txt;
+      area.innerHTML = `<div class="text-danger">Failed to load: ${txt}</div>`;
       return;
     }
 
     const bookings = await res.json();
     renderBookings(bookings);
   } catch (err) {
-    area.innerHTML = '<div class="text-danger">Error loading bookings: ' + err.message + '</div>';
+    area.innerHTML = `<div class="text-danger">Error loading bookings: ${err.message}</div>`;
   } finally {
-    loading && (loading.style.display = 'none');
+    if (loading) loading.style.display = 'none';
   }
 }
 
@@ -74,16 +82,24 @@ function renderBookings(bookings) {
     const card = document.createElement('div');
     card.className = 'p-3 booking-card';
 
-    // simple markup; adjust fields according to your Booking model
+    const id = b.id ?? '(n/a)';
+    const train = b.trainId ?? b.train ?? '—';
+    const seats = b.seats ?? 1;
+    const date = b.date ?? b.travelDate ?? '—';
+    const status = b.status ?? 'PENDING';
+
     card.innerHTML = `
-      <div class="d-flex justify-content-between">
+      <div class="d-flex justify-content-between align-items-start">
         <div>
-          <strong>Booking #${b.id || '(n/a)'}</strong>
-          <div class="muted-small">Train: ${b.trainId || b.train || '—'} • Seats: ${b.seats || 1}</div>
-          <div class="muted-small">Date: ${b.date || b.travelDate || '—'}</div>
+          <strong>Booking #${escapeHtml(id)}</strong>
+          <div class="muted-small">Train: ${escapeHtml(train)} • Seats: ${escapeHtml(seats)}</div>
+          <div class="muted-small">Date: ${escapeHtml(date)}</div>
+          <div class="muted-small">Status: ${escapeHtml(status)}</div>
         </div>
         <div class="text-end">
-          <button class="btn btn-sm btn-outline-danger" data-id="${b.id}" onclick="cancelBooking(this)">Cancel</button>
+          ${status === 'CONFIRMED'
+        ? `<a class="btn btn-sm btn-outline-primary" href="/ticket.html?id=${encodeURIComponent(id)}">View</a>`
+        : `<button class="btn btn-sm btn-outline-danger cancel-btn" data-id="${escapeHtml(id)}">Cancel</button>`}
         </div>
       </div>
     `;
@@ -94,50 +110,63 @@ function renderBookings(bookings) {
 
   area.innerHTML = '';
   area.appendChild(container);
-}
 
-async function cancelBooking(btn) {
-  const id = btn.getAttribute('data-id');
-  if (!confirm('Cancel booking #' + id + '?')) return;
-
-  try {
-    const res = await fetch('/api/bookings/' + encodeURIComponent(id), {
-      method: 'DELETE',
-      credentials: 'same-origin'
+  // attach cancel handlers
+  [...area.querySelectorAll('.cancel-btn')].forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.getAttribute('data-id');
+      if (!confirm('Cancel booking #' + id + '?')) return;
+      try {
+        const res = await fetch('/api/bookings/' + encodeURIComponent(id), {
+          method: 'DELETE',
+          headers: authHeaders(),
+          credentials: 'same-origin'
+        });
+        if (!res.ok) {
+          const txt = await res.text();
+          showMsg('Cancel failed: ' + txt);
+          return;
+        }
+        showMsg('Booking cancelled');
+        loadBookings();
+      } catch (err) {
+        showMsg('Error: ' + err.message);
+      }
     });
-    if (!res.ok) {
-      const txt = await res.text();
-      showMsg('Cancel failed: ' + txt);
-      return;
-    }
-    showMsg('Booking cancelled');
-    loadBookings();
-  } catch (err) {
-    showMsg('Error: ' + err.message);
-  }
+  });
 }
 
-/* ---------- Create booking ---------- */
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
+}
+
 function openCreateModal() {
-  const bsModal = new bootstrap.Modal(document.getElementById('createBookingModal'));
+  const modalEl = document.getElementById('createBookingModal');
+  if (!modalEl) return;
+  const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
   bsModal.show();
 }
 
 async function handleCreateBooking(e) {
   e.preventDefault();
-  const trainId = document.getElementById('trainId').value.trim();
-  const date = document.getElementById('travelDate').value;
-  const seats = parseInt(document.getElementById('seats').value, 10) || 1;
+  const trainId = (document.getElementById('trainId')?.value || '').trim();
+  const date = (document.getElementById('travelDate')?.value || '').trim();
+  const seats = parseInt(document.getElementById('seats')?.value || '1', 10) || 1;
 
   if (!trainId || !date) { showMsg('Train and date required'); return; }
 
   try {
     const res = await fetch('/api/bookings', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       credentials: 'same-origin',
       body: JSON.stringify({ trainId, date, seats })
     });
+
+    if (res.status === 401) {
+      window.location.href = '/login.html';
+      return;
+    }
 
     if (!res.ok) {
       const txt = await res.text();
@@ -146,30 +175,20 @@ async function handleCreateBooking(e) {
     }
 
     showMsg('Booking created');
-    // hide modal
     const modalEl = document.getElementById('createBookingModal');
-    bootstrap.Modal.getInstance(modalEl).hide();
-
-    // clear form
+    if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
     document.getElementById('createBookingForm').reset();
-
-    // refresh
     loadBookings();
   } catch (err) {
     showMsg('Error: ' + err.message);
   }
 }
 
-/* ---------- Logout ---------- */
 async function handleLogout() {
   try {
-    const res = await fetch('/api/auth/logout', {
-      method: 'POST',
-      credentials: 'same-origin'
-    });
-  } catch(e) {
-    // ignore network error; still clear client state
-  } finally {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+  } catch(e) { /* ignore */ }
+  finally {
     localStorage.removeItem('lankarail_role');
     localStorage.removeItem('lankarail_token');
     localStorage.removeItem('lankarail_email');
