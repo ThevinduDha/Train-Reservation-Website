@@ -16,27 +16,40 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // disable CSRF for easier REST testing (enable/adjust in production)
+                // disable CSRF during development/testing; enable/adjust for production
                 .csrf(csrf -> csrf.disable())
 
-                // permit static assets and auth endpoints
+                // Authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()     // your JSON register/login endpoints
-                        .requestMatchers("/login.html", "/signup.html", "/", "/index.html", "/admin.html").permitAll() // allow admin html to be served publicly
-                        // admin APIs require ADMIN role (keep API endpoints protected)
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // static assets + auth endpoints are public
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/login.html", "/signup.html", "/", "/index.html").permitAll()
+
+                        // admin UI (dashboard) and admin API require ADMIN role
+                        .requestMatchers("/admin-dashboard.html", "/api/admin/**").hasRole("ADMIN")
+
+                        // passenger dashboard requires authentication
+                        .requestMatchers("/passenger-dashboard.html", "/api/bookings/**", "/api/users/me").authenticated()
+
+                        // allow the static admin page to be fetched (so admin.html can be loaded for login),
+                        // but the admin-dashboard.html remains protected above.
+                        .requestMatchers("/admin.html").permitAll()
+
                         // everything else requires authentication
                         .anyRequest().authenticated()
                 )
 
-                // When an unauthenticated user tries to access a protected page, redirect
-                // to your custom login page (NOT Spring's default /login).
+                // When an unauthenticated user tries to open a protected page, redirect to your custom login page
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login.html"))
-                );
+                )
 
-        // Note: your AuthController handles /api/auth/login and sets the session. No formLogin() needed here.
+                // allow POST /api/auth/logout to be used for logout
+                .logout(logout -> logout
+                        .logoutUrl("/api/auth/logout")
+                        .permitAll()
+                );
 
         return http.build();
     }
