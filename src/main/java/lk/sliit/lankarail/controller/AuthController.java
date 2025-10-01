@@ -1,5 +1,6 @@
 package lk.sliit.lankarail.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lk.sliit.lankarail.model.User;
 import lk.sliit.lankarail.repository.UserRepository;
@@ -10,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -31,9 +33,7 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    /**
-     * Register new user — defaults to ROLE_MEMBER
-     */
+    /** Register new user — defaults to ROLE_MEMBER */
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody User user) {
         if (user.getEmail() == null || user.getPassword() == null) {
@@ -55,30 +55,35 @@ public class AuthController {
         return ResponseEntity.ok(created);
     }
 
-    /**
-     * Login — authenticates and starts session
-     */
+    /** Login — authenticates, saves SecurityContext into session, returns role info */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> body, HttpServletRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(body.get("email"), body.get("password"))
             );
+
+            // Put auth into context
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // build simple response: token placeholder + role(s)
+            // ✅ Persist context into HTTP session so it works across requests
+            request.getSession(true).setAttribute(
+                    HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                    SecurityContextHolder.getContext()
+            );
+
+            // Build response
             List<String> roles = authentication.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toList());
-
             String primaryRole = roles.isEmpty() ? "ROLE_MEMBER" : roles.get(0);
 
             Map<String, Object> resp = new HashMap<>();
             resp.put("message", "Login successful");
             resp.put("email", body.get("email"));
             resp.put("roles", roles);
-            resp.put("role", primaryRole);   // convenient single role for frontend
-            resp.put("token", "");           // placeholder if you later add JWT
+            resp.put("role", primaryRole);
+            resp.put("token", ""); // placeholder for JWT
 
             return ResponseEntity.ok(resp);
         } catch (Exception e) {
@@ -86,7 +91,5 @@ public class AuthController {
         }
     }
 
-    /**
-     * Logout is handled automatically by Spring at /api/auth/logout (if you wire it up)
-     */
+    /** Logout is handled automatically by Spring at /api/auth/logout */
 }

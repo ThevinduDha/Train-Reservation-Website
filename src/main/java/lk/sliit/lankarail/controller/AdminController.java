@@ -2,6 +2,7 @@ package lk.sliit.lankarail.controller;
 
 import lk.sliit.lankarail.model.User;
 import lk.sliit.lankarail.repository.UserRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -21,19 +22,29 @@ public class AdminController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // Admin creates new user (either member or admin)
+    /**
+     * Create a new user (by admin).
+     * - Admin can create ROLE_MEMBER or ROLE_ADMIN accounts.
+     * - Returns ResponseEntity for proper HTTP status codes.
+     */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users")
-    public Object createUser(@RequestBody Map<String, String> body) {
+    public ResponseEntity<?> createUser(@RequestBody Map<String, String> body) {
         String email = body.get("email");
         String password = body.get("password");
         String role = body.getOrDefault("role", "ROLE_MEMBER");
 
         if (email == null || password == null) {
-            return Map.of("error", "Email and password are required");
+            return ResponseEntity.badRequest().body(Map.of("error", "Email and password are required"));
         }
+
         if (userRepository.findByEmail(email).isPresent()) {
-            return Map.of("error", "Email already exists");
+            return ResponseEntity.badRequest().body(Map.of("error", "Email already exists"));
+        }
+
+        if (!role.startsWith("ROLE_")) {
+            // enforce Spring Security naming convention
+            role = "ROLE_" + role.toUpperCase();
         }
 
         User u = new User();
@@ -42,8 +53,10 @@ public class AdminController {
         u.setRole(role);
         u.setEnabled(true);
 
-        userRepository.save(u);
-        u.setPassword(null);
-        return u;
+        User saved = userRepository.save(u);
+        saved.setPassword(null); // never return password
+
+        return ResponseEntity.ok(saved);
     }
 }
+
