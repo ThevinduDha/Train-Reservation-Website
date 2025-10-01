@@ -15,12 +15,12 @@ html, body {
   right: 0;
   top: 0;
   height: 64px;
-  background: rgba(255,255,255,0.95); /* mostly white */
+  background: rgba(255,255,255,0.95);
   display: flex;
   align-items: center;
   padding: 0 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  z-index: 50;
+  z-index: 60;
 }
 
 /* navbar inside the topbar (keeps style) */
@@ -34,18 +34,21 @@ html, body {
 .brand-text { font-weight: 700; color: #0b4f4f; font-size: 1rem; }
 
 /* ---------- FULLSCREEN HERO ---------- */
+/* fixed full-viewport background so pages feel identical size-wise */
 .hero-bg {
   position: fixed;
-  inset: 0;
+  inset: 0;                     /* top:0; right:0; bottom:0; left:0; */
   background-size: cover;
   background-position: center;
   z-index: 0;
   filter: none;
 }
+
+/* subtle overlay to help text contrast (keeps hero visible) */
 .hero-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.18);
+  background: rgba(0,0,0,0.18); /* slightly darken to make glass readable */
   z-index: 5;
   pointer-events: none;
 }
@@ -53,11 +56,12 @@ html, body {
 /* main content above hero */
 .page-inner {
   position: relative;
-  z-index: 10;
+  z-index: 10; /* above hero */
   min-height: 100vh;
+  padding-bottom: 48px;
 }
 
-/* layout wrapper */
+/* layout wrapper (keeps nav at top, card placed to right center) */
 .auth-wrapper {
   display: flex;
   align-items: center;
@@ -65,15 +69,21 @@ html, body {
   min-height: calc(100vh - 72px);
   padding: 32px 48px;
 }
+
+/* center inner grid to allow left spacing while card sits right */
 .auth-grid {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1400px; /* controls how wide the hero feels */
   display: grid;
   grid-template-columns: 1fr 480px;
   gap: 40px;
   align-items: center;
 }
+
+/* empty left column just for spacing (hero is page background) */
 .auth-left-space {}
+
+/* right column alignment: keep card at vertical center, slightly to the right */
 .auth-right {
   display: flex;
   align-items: center;
@@ -81,7 +91,7 @@ html, body {
   padding-right: 20px;
 }
 
-/* GLASS CARD */
+/* GLASS CARD (used for login/signup card) */
 .glass-card {
   width: 100%;
   max-width: 420px;
@@ -120,7 +130,7 @@ html, body {
   padding: 10px 14px;
 }
 
-/* ✅ NEW: solid red admin button */
+/* ✅ solid red admin button */
 .btn-admin {
   background-color: #dc3545;   /* Bootstrap red */
   border: none;
@@ -143,7 +153,7 @@ html, body {
 }
 @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
-/* responsive */
+/* responsive: on small screens stack content and ensure hero still covers */
 @media (max-width: 991px) {
   .auth-grid { grid-template-columns: 1fr; gap: 18px; }
   .auth-right { justify-content: center; padding-right: 0; }
@@ -153,5 +163,104 @@ html, body {
   .content-offset { padding-top: 64px; }
 }
 
-/* accessibility */
+/* accessibility focus */
 input:focus, button:focus { outline: 3px solid rgba(13,110,253,0.12); outline-offset: 2px; }
+
+/* ----------------- Dashboard / Panel specific styles ----------------- */
+
+/* Dashboard glass panel that sits above the hero (centered width) */
+.dashboard-panel {
+  max-width: 1100px;
+  margin: 28px auto;
+  padding: 34px;
+  border-radius: 14px;
+  background: rgba(10,10,10,0.45); /* dark glass for dramatic look */
+  color: #fff;
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  backdrop-filter: blur(12px) saturate(120%);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Dashboard header styles */
+.dashboard-panel .dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.dashboard-panel h1, .dashboard-panel h2, .dashboard-panel h3 {
+  margin: 0;
+  color: #fff;
+}
+.dashboard-panel .lead {
+  color: rgba(255,255,255,0.78);
+  margin-top: 6px;
+  font-size: 0.98rem;
+}
+
+/* Container that holds booking rows (rows themselves are transparent) */
+.bookings-list {
+  margin-top: 8px;
+}
+
+/* Each booking row — transparent to show background blur */
+.booking-card {
+  background: rgba(255,255,255,0.06); /* slightly lighter than panel so row is visible */
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  color: #f5f5f5;
+}
+
+/* If you prefer darker rows, increase alpha above */
+.booking-card .muted-small {
+  color: rgba(255,255,255,0.75);
+}
+
+/* Button inside the glass should be bright */
+.dashboard-panel .btn-primary {
+  background: linear-gradient(180deg,#1e7cf6,#0b63d9);
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+/* For small screens reduce padding */
+@media (max-width: 767px) {
+  .dashboard-panel {
+    margin: 18px;
+    padding: 18px;
+    border-radius: 10px;
+  }
+  .booking-card { padding: 12px; margin-bottom: 12px; }
+}
+
+/* bookings table helpers */
+.table-bookings { width:100%; }
+.booking-actions .btn { padding: .375rem .6rem; font-size: .9rem; }
+
+/* small empty state */
+.empty-state { padding: 36px 0; color: rgba(255,255,255,0.8); text-align:center; }
+
+/* mobile tweak */
+@media (max-width: 767px) {
+  .auth-grid { grid-template-columns: 1fr; }
+  .glass-card, .dashboard-panel { margin-bottom: 12px; padding: 16px; }
+}
+
+/* extra utilities */
+.muted-small { color:#6c757d; font-size:.95rem; }
+
+/* helper: lighten text for hero-top area */
+.top-hero-text {
+  color: rgba(255,255,255,0.95);
+}
+
+/* ensure topbar elements (like logout) remain visible on dark hero */
+.topbar .btn, .topbar .navbar-brand, .topbar .brand-text {
+  z-index: 70;
+}
