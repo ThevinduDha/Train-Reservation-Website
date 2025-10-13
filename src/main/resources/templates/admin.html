@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -16,11 +16,11 @@
 <div class="topbar">
     <nav class="navbar navbar-light">
         <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="/">
+            <a class="navbar-brand d-flex align-items-center" href="/static">
                 <img src="/images/logo.png" alt="LankaRail" class="logo-img me-2">
                 <span class="brand-text">LankaRail</span>
             </a>
-            <div><a class="btn btn-outline-secondary" href="/login.html">Passenger Login</a></div>
+            <div><a class="btn btn-outline-secondary" href="/templates/login.html">Passenger Login</a></div>
         </div>
     </nav>
 </div>
@@ -56,7 +56,7 @@
                             <hr class="my-4">
 
                             <div class="text-center">
-                                <small class="text-muted">Back to <a href="/login.html">Passenger Login</a></small>
+                                <small class="text-muted">Back to <a href="/templates/login.html">Passenger Login</a></small>
                             </div>
                         </form>
                     </div>

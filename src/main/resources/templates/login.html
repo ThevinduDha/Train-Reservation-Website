@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -20,12 +20,12 @@
 <div class="topbar">
   <nav class="navbar navbar-light">
     <div class="container-fluid">
-      <a class="navbar-brand d-flex align-items-center" href="/">
+      <a class="navbar-brand d-flex align-items-center" href="/static">
         <img src="/images/logo.png" alt="LankaRail" class="logo-img me-2">
         <span class="brand-text">LankaRail</span>
       </a>
       <div id="navActions">
-        <a id="guestSignupBtn" class="btn btn-outline-primary" href="/signup.html">Sign up</a>
+        <a id="guestSignupBtn" class="btn btn-outline-primary" th:href="@{/signup}">Sign up</a>
       </div>
     </div>
   </nav>
@@ -61,13 +61,13 @@
 
               <!-- Solid red Admin Portal button (white text) -->
               <div class="d-grid mt-3">
-                <a href="/admin.html" class="btn btn-admin">Admin Portal</a>
+                <a th:href="@{/admin}" class="btn btn-admin">Admin Portal</a>
               </div>
 
               <hr class="my-4">
 
               <div class="text-center">
-                <small class="text-muted">Don't have an account? <a href="/signup.html">Create an account</a></small>
+                <small class="text-muted">Don't have an account? <a href="/templates/signup.html">Create an account</a></small>
               </div>
             </form>
           </div>
@@ -92,7 +92,7 @@
           const nav = document.getElementById('navActions');
           const btn = document.createElement('a');
           btn.className = 'btn btn-outline-danger ms-2';
-          btn.href = '/admin.html';
+          btn.href = '/admin';
           btn.textContent = 'Admin Portal';
           nav.appendChild(btn);
         }
