@@ -148,7 +148,7 @@ async function authLogin() {
     const roleStr = (JSON.parse(localStorage.getItem('lankarail_role') || '[]') || []).join(',').toUpperCase();
     if (roleStr.includes('ADMIN')) {
       // admin logged in
-      window.location.href = '/admin-dashboard.html';
+      window.location.href = '/admin/dashboard';
     } else {
       // passenger logged in
       window.location.href = '/passenger-dashboard.html';
