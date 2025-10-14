@@ -4,55 +4,68 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>LankaRail — Admin Dashboard</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
   <link rel="stylesheet" href="/css/styles.css">
+
 </head>
 <body>
-<!-- background -->
-<div class="hero-bg" style="background-image: url('/images/dashboard-admin.jpg');"></div>
-<div class="hero-overlay"></div>
+<div class="dashboard-container">
 
-<!-- topbar -->
-<div class="topbar">
-  <nav class="navbar navbar-light w-100">
-    <div class="container-fluid">
-      <a class="navbar-brand d-flex align-items-center" href="/static">
-        <img src="/images/logo.png" alt="LankaRail" class="logo-img me-2">
-        <span class="brand-text">LankaRail Admin</span>
-      </a>
-      <div class="d-flex align-items-center gap-3">
-        <span id="adminInfo" class="text-dark fw-semibold"></span>
-        <button id="logoutBtn" class="btn btn-sm btn-outline-danger">Logout</button>
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="/images/logo.png" alt="LankaRail" class="logo-img me-2">
+      <span class="brand-text">LankaRail Admin</span>
+    </div>
+    <ul class="sidebar-nav">
+      <li><a href="/admin/dashboard" class="active"><i class="fas fa-tachometer-alt fa-fw me-2"></i>Dashboard</a></li>
+      <li><a href="#" onclick="loadTrains()"><i class="fas fa-train fa-fw me-2"></i>Manage Trains</a></li>
+      <li><a href="#" onclick="loadSchedules()"><i class="fas fa-calendar-alt fa-fw me-2"></i>Manage Schedules</a></li>
+      <li><a href="#" onclick="loadBookings()"><i class="fas fa-ticket-alt fa-fw me-2"></i>View Bookings</a></li>
+      <li><a href="#" onclick="loadUsers()"><i class="fas fa-users fa-fw me-2"></i>Manage Users</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <span id="adminInfo" class="text-white small"></span>
+      <button id="logoutBtn" class="btn btn-sm btn-outline-danger mt-2 w-100">Logout</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <h2 class="mb-4">Admin Dashboard</h2>
+
+    <div class="row g-4 mb-4">
+      <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+          <h5>Total Trains</h5>
+          <p class="stat-number">12</p> <i class="fas fa-train card-icon"></i>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+          <h5>Active Schedules</h5>
+          <p class="stat-number">8</p> <i class="fas fa-calendar-check card-icon"></i>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+          <h5>Pending Bookings</h5>
+          <p class="stat-number">4</p> <i class="fas fa-clock card-icon"></i>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="stat-card">
+          <h5>Registered Users</h5>
+          <p class="stat-number">42</p> <i class="fas fa-user-plus card-icon"></i>
+        </div>
       </div>
     </div>
-  </nav>
-</div>
 
-<div class="page-inner content-offset container py-4">
-
-  <h2 class="mb-4 text-white" style="margin-top: 2cm;">Admin Dashboard</h2>
-
-
-  <!-- quick actions -->
-  <div class="row g-3 mb-4">
-    <div class="col-md-3">
-      <button class="btn btn-primary w-100" onclick="loadUsers()">Manage Users</button>
+    <div id="adminContent" class="glass-card p-4 animate-fade-in w-100">
+      <div class="text-muted">Welcome to the LankaRail Admin Panel. Select a module from the sidebar to begin.</div>
     </div>
-    <div class="col-md-3">
-      <button class="btn btn-primary w-100" onclick="loadTrains()">Manage Trains</button>
-    </div>
-    <div class="col-md-3">
-      <button class="btn btn-primary w-100" onclick="loadSchedules()">Manage Schedules</button>
-    </div>
-    <div class="col-md-3">
-      <button class="btn btn-primary w-100" onclick="loadBookings()">View Bookings</button>
-    </div>
-  </div>
-
-  <!-- dynamic content -->
-  <div id="adminContent" class="glass-card p-3 animate-fade-in">
-    <div class="text-muted">Select a module to manage.</div>
-  </div>
+  </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
