@@ -33,6 +33,12 @@ public class ViewController {
         return "admin-dashboard"; // Renders admin-dashboard.html
     }
 
+
+    @GetMapping("/passenger/dashboard")
+    public String passengerDashboardPage() {
+        return "passenger-dashboard"; // Renders passenger-dashboard.html
+    }
+
     // Note: We don't need mappings for admin-dashboard or passenger-dashboard here.
     // Spring Security will handle redirecting to them after a successful login.
     // However, if you add direct links to them, you would add them here.
