@@ -21,24 +21,23 @@ public class SecurityConfig {
 
                 // Authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        // static assets + auth endpoints are public
+                        // static assets MUST be first to be allowed
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Our new public page URLs from ViewController
                         .requestMatchers("/", "/login", "/signup", "/admin").permitAll()
 
                         // admin UI (dashboard) and admin API require ADMIN role
                         .requestMatchers("/admin/dashboard", "/api/admin/**").hasRole("ADMIN")
 
                         // passenger dashboard requires authentication
-                        .requestMatchers("/passenger-dashboard.html", "/api/bookings/**", "/api/users/me").authenticated()
+                        .requestMatchers("/passenger/dashboard", "/api/bookings/**", "/api/users/me").authenticated()
 
                         // everything else requires authentication
                         .anyRequest().authenticated()
                 )
                 // When an unauthenticated user tries to open a protected page, redirect to your custom login page
                 .exceptionHandling(e -> e
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")) // Changed to the controller path
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
                 )
 
                 // allow POST /api/auth/logout to be used for logout
