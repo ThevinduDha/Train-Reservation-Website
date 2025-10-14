@@ -61,7 +61,7 @@ async function authRegister() {
     }
 
     showMessage('Registered successfully. You can now sign in.');
-    window.location.href = '/login.html';
+    window.location.href = '/login'; // Changed to controller path
   } catch (err) {
     console.error(err);
     showMessage('Registration error: ' + err.message);
@@ -151,7 +151,8 @@ async function authLogin() {
       window.location.href = '/admin/dashboard';
     } else {
       // passenger logged in
-      window.location.href = '/passenger-dashboard.html';
+      // THIS IS THE CORRECTED LINE
+      window.location.href = '/passenger/dashboard';
     }
   } catch (err) {
     console.error(err);
@@ -172,7 +173,7 @@ async function authLogout() {
     localStorage.removeItem('lankarail_token');
     localStorage.removeItem('lankarail_role');
     localStorage.removeItem('lankarail_email');
-    window.location.href = '/login.html';
+    window.location.href = '/login'; // Changed to controller path
   }
 }
 

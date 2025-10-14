@@ -5,21 +5,33 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // A reusable function to fetch data and update the content panel
+// A reusable function to fetch data and update the content panel with animations
 async function loadContent(url, contentRenderer) {
   const contentDiv = document.getElementById('adminContent');
-  contentDiv.innerHTML = '<div class="text-center text-white">Loading...</div>'; // Show a loading message
 
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+  // 1. Add fade-out animation
+  contentDiv.classList.add('fade-out');
+
+  // 2. Wait for the animation to be visible, then load data
+  setTimeout(async () => {
+    contentDiv.innerHTML = '<div class="text-center text-white">Loading...</div>'; // Show a loading message
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      contentRenderer(data); // Call the specific function to build the HTML
+    } catch (error) {
+      console.error('Failed to load content:', error);
+      contentDiv.innerHTML = `<div class="text-danger">Failed to load content. Please check the console for errors.</div>`;
+    } finally {
+      // 3. Remove old animation classes and add the fade-in animation
+      contentDiv.classList.remove('fade-out');
+      contentDiv.classList.add('animate-fade-in');
     }
-    const data = await response.json();
-    contentRenderer(data); // Call the specific function to build the HTML
-  } catch (error) {
-    console.error('Failed to load content:', error);
-    contentDiv.innerHTML = `<div class="text-danger">Failed to load content. Please check the console for errors.</div>`;
-  }
+  }, 200); // This timeout should match the animation duration in the CSS
 }
 
 // --- Specific Content Loaders ---
