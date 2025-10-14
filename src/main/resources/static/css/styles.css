@@ -264,3 +264,177 @@ input:focus, button:focus { outline: 3px solid rgba(13,110,253,0.12); outline-of
 .topbar .btn, .topbar .navbar-brand, .topbar .brand-text {
   z-index: 70;
 }
+
+/*
+============================================================
+== NEW ADMIN DASHBOARD LAYOUT STYLES (SIDEBAR VERSION) =====
+============================================================
+*/
+
+/* Remove the old background image styling from the body if it exists */
+body {
+  background-image: none !important;
+  background-color: #f8fafc; /* A light background for the content area */
+  color: #212529;
+}
+
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar Styling */
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #1d2b3c 0%, #101822 100%);
+  color: #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.sidebar-header .brand-text {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff; /* Override for sidebar */
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-grow: 1; /* Pushes footer to the bottom */
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  color: #adb5bd;
+  text-decoration: none;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.sidebar-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1rem;
+}
+
+/* Main Content Area */
+.main-content {
+  flex-grow: 1;
+  padding: 2rem;
+  background-image: url('../images/dashboard-admin.jpg'); /* Your cool background */
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  color: white;
+}
+
+.main-content::before { /* Overlay to make text readable */
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+/* Position content above the overlay */
+.main-content > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Statistic Cards */
+.stat-card {
+  background-color: rgba(255, 255, 255, 0.1); /* Lighter glass effect */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card h5 {
+  font-size: 1rem;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.stat-card .stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.stat-card .card-icon {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 3rem;
+  color: rgba(255, 255, 255, 0.15);
+}
+
+/* Styles for compact icon buttons from previous step */
+.btn-icon {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.btn-icon i {
+  font-size: 0.9em;
+}
+
+
+/*
+=================================================
+== FINAL DASHBOARD FIX & POLISH (OCT 13 2025) ====
+=================================================
+*/
+
+/* Animation for content transitioning out */
+.fade-out {
+  animation: fadeOut 200ms ease-out forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* Force the main content panel to use the full available width */
+#adminContent {
+  max-width: 100% !important; /* !important ensures it overrides other styles */
+}

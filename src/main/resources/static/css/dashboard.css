@@ -16,3 +16,21 @@
     .auth-grid { grid-template-columns: 1fr; }
     .glass-card { margin-bottom: 12px; }
 }
+#adminContent {
+    max-width: 100%;
+}
+/* Animation for content transitioning out */
+.fade-out {
+    animation: fadeOut 200ms ease-out forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
