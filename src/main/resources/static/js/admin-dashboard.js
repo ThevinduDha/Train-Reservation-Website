@@ -152,7 +152,7 @@ function loadSchedules() {
                             <td>
                                 <div class="d-flex gap-2">
                                     <button class="btn btn-sm btn-icon btn-outline-info" title="Edit Schedule"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-sm btn-icon btn-outline-danger" title="Delete Schedule"><i class="fas fa-trash-alt"></i></button>
+                                    <button class="btn btn-sm btn-icon btn-outline-danger" title="Delete Schedule" onclick="deleteSchedule(${schedule.id})"><i class="fas fa-trash-alt"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -317,3 +317,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+// --- Delete Schedule Logic ---
+
+async function deleteSchedule(scheduleId) {
+  // Show a confirmation dialog to prevent accidental deletion
+  if (!confirm('Are you sure you want to delete schedule ID #' + scheduleId + '? This action cannot be undone.')) {
+    return; // Stop if the user clicks "Cancel"
+  }
+
+  try {
+    const response = await fetch(`/api/admin/schedules/${scheduleId}`, {
+      method: 'DELETE'
+    });
+
+    if (response.ok) {
+      alert('Schedule deleted successfully.');
+      loadSchedules(); // Refresh the table to show the change
+    } else {
+      // Try to get a more specific error message from the backend
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData ? errorData.message : 'Failed to delete schedule.');
+    }
+  } catch (error) {
+    console.error('Error deleting schedule:', error);
+    alert('Error: ' + error.message);
+  }
+}
