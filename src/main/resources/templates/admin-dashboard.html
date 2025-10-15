@@ -150,5 +150,51 @@
     </div>
   </div>
 </div>
+<div class="modal fade" id="editScheduleModal" tabindex="-1" aria-labelledby="editScheduleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title" id="editScheduleModalLabel">Edit Schedule</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editScheduleForm">
+          <div class="mb-3">
+            <label for="editScheduleTrainId" class="form-label">Select Train</label>
+            <select class="form-select" id="editScheduleTrainId" required></select>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="editScheduleDepartureStation" class="form-label">Departure Station</label>
+              <input type="text" class="form-control" id="editScheduleDepartureStation" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="editScheduleArrivalStation" class="form-label">Arrival Station</label>
+              <input type="text" class="form-control" id="editScheduleArrivalStation" required>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="editScheduleDepartureTime" class="form-label">Departure Time</label>
+              <input type="datetime-local" class="form-control" id="editScheduleDepartureTime" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="editScheduleArrivalTime" class="form-label">Arrival Time</label>
+              <input type="datetime-local" class="form-control" id="editScheduleArrivalTime" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="editSchedulePrice" class="form-label">Ticket Price (LKR)</label>
+            <input type="number" step="0.01" class="form-control" id="editSchedulePrice" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" form="editScheduleForm" class="btn btn-primary">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
