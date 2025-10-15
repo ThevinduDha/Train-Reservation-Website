@@ -43,7 +43,7 @@ function loadTrains() {
     let tableHtml = `
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="text-white mb-0">Manage Trains</h4>
-                <button class="btn btn-success btn-sm">+ Add New Train</button>
+                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addTrainModal">+ Add New Train</button>
             </div>
             <div class="table-responsive">
                 <table class="table table-dark table-striped table-hover">
@@ -94,9 +94,149 @@ function loadUsers() {
 }
 
 function loadSchedules() {
-  document.getElementById('adminContent').innerHTML = '<div class="text-white">Schedule Management Coming Soon...</div>';
+  // We need to fetch both schedules AND trains to display the train name
+  const fetchSchedules = fetch('/api/admin/schedules').then(res => res.json());
+  const fetchTrains = fetch('/api/admin/trains').then(res => res.json());
+
+  // Use Promise.all to wait for both requests to complete
+  Promise.all([fetchSchedules, fetchTrains])
+      .then(([schedules, trains]) => {
+        const contentDiv = document.getElementById('adminContent');
+
+        // Create a quick lookup map for train names from their IDs
+        const trainMap = new Map(trains.map(train => [train.id, train.name]));
+
+        let tableHtml = `
+                <div class="admin-content-panel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="text-white mb-0">Manage Schedules</h4>
+                        <button class="btn btn-success btn-sm">+ Add New Schedule</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Train Name</th>
+                                    <th scope="col">From</th>
+                                    <th scope="col">To</th>
+                                    <th scope="col">Departure</th>
+                                    <th scope="col">Arrival</th>
+                                    <th scope="col">Price (LKR)</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+
+        if (schedules.length === 0) {
+          tableHtml += '<tr><td colspan="8" class="text-center">No schedules found.</td></tr>';
+        } else {
+          schedules.forEach(schedule => {
+            // Look up train name using the map. Fallback to just the ID if not found.
+            const trainName = trainMap.get(schedule.trainId) || `Train ID: ${schedule.trainId}`;
+
+            // Format dates for better readability
+            const departure = schedule.departureTime.replace('T', ' ');
+            const arrival = schedule.arrivalTime.replace('T', ' ');
+
+            tableHtml += `
+                        <tr>
+                            <th scope="row">${schedule.id}</th>
+                            <td>${trainName}</td>
+                            <td>${schedule.departureStation}</td>
+                            <td>${schedule.arrivalStation}</td>
+                            <td>${departure}</td>
+                            <td>${arrival}</td>
+                            <td>${schedule.price.toFixed(2)}</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-icon btn-outline-info" title="Edit Schedule"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-icon btn-outline-danger" title="Delete Schedule"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+          });
+        }
+
+        tableHtml += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+        contentDiv.innerHTML = tableHtml;
+      })
+      .catch(error => {
+        console.error('Failed to load schedules:', error);
+        const contentDiv = document.getElementById('adminContent');
+        contentDiv.innerHTML = `<div class="text-danger">Failed to load schedules. Please check the console for errors.</div>`;
+      });
 }
 
 function loadBookings() {
   document.getElementById('adminContent').innerHTML = '<div class="text-white">Booking Viewer Coming Soon...</div>';
 }
+// Function to handle the submission of the "Add New Train" form
+async function handleAddNewTrain(event) {
+  event.preventDefault(); // Stop the default form submission
+
+  const name = document.getElementById('trainName').value;
+  const type = document.getElementById('trainType').value;
+  const capacity = document.getElementById('trainCapacity').value;
+
+  if (!name || !type || !capacity) {
+    alert('Please fill out all fields.');
+    return;
+  }
+
+  const trainData = {
+    name: name,
+    type: type,
+    capacity: parseInt(capacity, 10)
+  };
+
+  try {
+    const response = await fetch('/api/admin/trains', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(trainData)
+    });
+
+    if (!response.ok) {
+      // Try to get a more specific error message from the backend
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create train.');
+    }
+
+    // Success!
+    alert('Train added successfully!');
+
+    // Hide the modal
+    const modalElement = document.getElementById('addTrainModal');
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    modal.hide();
+
+    // Clear the form for the next time
+    document.getElementById('addTrainForm').reset();
+
+    // Reload the list of trains to show the new one
+    loadTrains();
+
+  } catch (error) {
+    console.error('Error adding train:', error);
+    alert('Error: ' + error.message);
+  }
+}
+
+// Attach the event listener to the form when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+  const addTrainForm = document.getElementById('addTrainForm');
+  if (addTrainForm) {
+    addTrainForm.addEventListener('submit', handleAddNewTrain);
+  }
+});
