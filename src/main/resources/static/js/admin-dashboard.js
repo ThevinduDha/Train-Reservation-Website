@@ -240,3 +240,80 @@ document.addEventListener('DOMContentLoaded', () => {
     addTrainForm.addEventListener('submit', handleAddNewTrain);
   }
 });
+
+// --- Add Schedule Logic ---
+
+// Function to handle the submission of the "Add New Schedule" form
+async function handleAddNewSchedule(event) {
+  event.preventDefault();
+
+  const scheduleData = {
+    trainId: document.getElementById('scheduleTrainId').value,
+    departureStation: document.getElementById('scheduleDepartureStation').value,
+    arrivalStation: document.getElementById('scheduleArrivalStation').value,
+    departureTime: document.getElementById('scheduleDepartureTime').value + ':00', // Append seconds
+    arrivalTime: document.getElementById('scheduleArrivalTime').value + ':00', // Append seconds
+    price: parseFloat(document.getElementById('schedulePrice').value)
+  };
+
+  // Basic validation
+  if (!scheduleData.trainId || !scheduleData.departureStation || !scheduleData.arrivalStation || !scheduleData.departureTime || !scheduleData.arrivalTime || !scheduleData.price) {
+    alert('Please fill out all fields.');
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/admin/schedules', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(scheduleData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to create schedule.');
+    }
+
+    alert('Schedule added successfully!');
+    const modal = bootstrap.Modal.getInstance(document.getElementById('addScheduleModal'));
+    modal.hide();
+    document.getElementById('addScheduleForm').reset();
+    loadSchedules(); // Refresh the schedules table
+
+  } catch (error) {
+    console.error('Error adding schedule:', error);
+    alert('Error: ' + error.message);
+  }
+}
+
+// Attach event listeners when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  // Listener for the form submission
+  const addScheduleForm = document.getElementById('addScheduleForm');
+  if (addScheduleForm) {
+    addScheduleForm.addEventListener('submit', handleAddNewSchedule);
+  }
+
+  // Listener to populate train dropdown when modal is about to open
+  const addScheduleModal = document.getElementById('addScheduleModal');
+  if (addScheduleModal) {
+    addScheduleModal.addEventListener('show.bs.modal', async () => {
+      const select = document.getElementById('scheduleTrainId');
+      try {
+        const response = await fetch('/api/admin/trains');
+        const trains = await response.json();
+
+        select.innerHTML = '<option value="" selected disabled>Select a train</option>'; // Clear old options
+        trains.forEach(train => {
+          const option = document.createElement('option');
+          option.value = train.id;
+          option.textContent = `${train.name} (ID: ${train.id})`;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        select.innerHTML = '<option value="" disabled>Could not load trains</option>';
+        console.error("Failed to fetch trains for dropdown:", error);
+      }
+    });
+  }
+});
