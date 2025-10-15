@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/schedules")
+@RequestMapping("/api/admin/schedules") // Changed here
 public class ScheduleController {
 
     private final ScheduleService service;
