@@ -151,7 +151,7 @@ function loadSchedules() {
                             <td>${schedule.price.toFixed(2)}</td>
                             <td>
                                 <div class="d-flex gap-2">
-                                    <button class="btn btn-sm btn-icon btn-outline-info" title="Edit Schedule"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-icon btn-outline-info" title="Edit Schedule" onclick="openEditScheduleModal(${schedule.id})"><i class="fas fa-edit"></i></button>
                                     <button class="btn btn-sm btn-icon btn-outline-danger" title="Delete Schedule" onclick="deleteSchedule(${schedule.id})"><i class="fas fa-trash-alt"></i></button>
                                 </div>
                             </td>
@@ -344,3 +344,96 @@ async function deleteSchedule(scheduleId) {
     alert('Error: ' + error.message);
   }
 }
+// --- Edit Schedule Logic (Corrected) ---
+
+document.addEventListener('DOMContentLoaded', function() {
+  const editScheduleForm = document.getElementById('editScheduleForm');
+  const editScheduleModalEl = document.getElementById('editScheduleModal');
+
+  // Check if the elements exist before creating the modal instance
+  if (editScheduleModalEl) {
+    const editScheduleModal = new bootstrap.Modal(editScheduleModalEl);
+
+    // This function is called when the user clicks the edit icon
+    window.openEditScheduleModal = async function(scheduleId) {
+      // Store the ID on the form element itself to use it later during submission
+      editScheduleForm.dataset.scheduleId = scheduleId;
+
+      try {
+        // Fetch the specific schedule's data
+        const scheduleResponse = await fetch(`/api/admin/schedules/${scheduleId}`);
+        const schedule = await scheduleResponse.json();
+
+        // Fetch all trains to populate the dropdown
+        const trainsResponse = await fetch('/api/admin/trains');
+        const trains = await trainsResponse.json();
+
+        // Populate the dropdown
+        const select = document.getElementById('editScheduleTrainId');
+        select.innerHTML = ''; // Clear previous options
+        trains.forEach(train => {
+          const option = document.createElement('option');
+          option.value = train.id;
+          option.textContent = `${train.name} (ID: ${train.id})`;
+          if (train.id === schedule.trainId) {
+            option.selected = true;
+          }
+          select.appendChild(option);
+        });
+
+        // Populate the rest of the form fields
+        document.getElementById('editScheduleDepartureStation').value = schedule.departureStation;
+        document.getElementById('editScheduleArrivalStation').value = schedule.arrivalStation;
+        document.getElementById('editScheduleDepartureTime').value = schedule.departureTime.slice(0, 16);
+        document.getElementById('editScheduleArrivalTime').value = schedule.arrivalTime.slice(0, 16);
+        document.getElementById('editSchedulePrice').value = schedule.price;
+
+        editScheduleModal.show();
+      } catch (error) {
+        console.error("Failed to load schedule for editing:", error);
+        alert("Error: Could not load schedule data.");
+      }
+    }
+
+    // This function handles the form submission
+    async function handleUpdateSchedule(event) {
+      event.preventDefault();
+      const scheduleId = editScheduleForm.dataset.scheduleId;
+      if (!scheduleId) return;
+
+      const updatedScheduleData = {
+        trainId: document.getElementById('editScheduleTrainId').value,
+        departureStation: document.getElementById('editScheduleDepartureStation').value,
+        arrivalStation: document.getElementById('editScheduleArrivalStation').value,
+        departureTime: document.getElementById('editScheduleDepartureTime').value + ':00',
+        arrivalTime: document.getElementById('editScheduleArrivalTime').value + ':00',
+        price: parseFloat(document.getElementById('editSchedulePrice').value)
+      };
+
+      try {
+        const response = await fetch(`/api/admin/schedules/${scheduleId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedScheduleData)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to update schedule.');
+        }
+
+        alert('Schedule updated successfully!');
+        editScheduleModal.hide();
+        loadSchedules(); // Refresh the table
+      } catch (error) {
+        console.error('Error updating schedule:', error);
+        alert('Error: ' + error.message);
+      }
+    }
+
+    // Attach the submit event listener to the edit form
+    if (editScheduleForm) {
+      editScheduleForm.addEventListener('submit', handleUpdateSchedule);
+    }
+  }
+});
