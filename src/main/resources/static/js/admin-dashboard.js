@@ -110,7 +110,7 @@ function loadSchedules() {
                 <div class="admin-content-panel">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="text-white mb-0">Manage Schedules</h4>
-                        <button class="btn btn-success btn-sm">+ Add New Schedule</button>
+                        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addScheduleModal">+ Add New Schedule</button>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-dark table-striped table-hover">
