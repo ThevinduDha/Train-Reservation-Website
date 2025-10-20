@@ -425,7 +425,7 @@ async function openEditTrainModal(trainId) {
     document.getElementById('editTrainName').value = train.name;
     document.getElementById('editTrainType').value = train.type;
     document.getElementById('editTrainCapacity').value = train.capacity;
-    bootstrap.Modal.getInstance(document.getElementById('editTrainModal')).show();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('editTrainModal')).show();
   } catch (error) {
     console.error("Failed to load train for editing:", error);
     alert("Error: Could not load train data.");
@@ -544,7 +544,7 @@ async function openEditScheduleModal(scheduleId) {
     document.getElementById('editScheduleArrivalTime').value = schedule.arrivalTime.slice(0, 16);
     document.getElementById('editSchedulePrice').value = schedule.price;
 
-    bootstrap.Modal.getInstance(document.getElementById('editScheduleModal')).show();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('editScheduleModal')).show();
   } catch (error) {
     console.error("Failed to load schedule for editing:", error);
     alert("Error: Could not load schedule data.");
@@ -638,7 +638,7 @@ async function openEditStationModal(stationId) {
 
     document.getElementById('editStationName').value = station.name;
     document.getElementById('editStationCity').value = station.city;
-    bootstrap.Modal.getInstance(document.getElementById('editStationModal')).show();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('editStationModal')).show();
   } catch (error) {
     alert('Error: ' + error.message); // THIS IS THE LINE WITH THE ERROR
   }
@@ -844,5 +844,170 @@ document.addEventListener('DOMContentLoaded', function() {
   const editStationForm = document.getElementById('editStationForm');
   if (editStationForm) {
     editStationForm.addEventListener('submit', handleUpdateStation);
+  }
+});
+
+// --- Route Management ---
+
+function loadRoutes() {
+  loadContent('/api/admin/routes', (routes) => {
+    const contentDiv = document.getElementById('adminContent');
+
+    let tableHtml = `
+            <div class="admin-content-panel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="text-white mb-0">Manage Routes</h4>
+                    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addRouteModal">+ Add New Route</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Route Name</th>
+                                <th scope="col">Origin</th>
+                                <th scope="col">Destination</th>
+                                <th scope="col">Distance (km)</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+
+    if (routes.length === 0) {
+      tableHtml += '<tr><td colspan="6" class="text-center">No routes found.</td></tr>';
+    } else {
+      routes.forEach(route => {
+        tableHtml += `
+                    <tr>
+                        <th scope="row">${route.id}</th>
+                        <td>${route.name}</td>
+                        <td>${route.origin}</td>
+                        <td>${route.destination}</td>
+                        <td>${route.distanceKm}</td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-icon btn-outline-info" title="Edit Route" onclick="openEditRouteModal(${route.id})"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-icon btn-outline-danger" title="Delete Route" onclick="deleteRoute(${route.id})"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+      });
+    }
+
+    tableHtml += `
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        `;
+
+    contentDiv.innerHTML = tableHtml;
+  });
+}
+
+// --- Route CRUD Helper Functions ---
+
+async function deleteRoute(routeId) {
+  if (!confirm('Are you sure you want to delete route ID #' + routeId + '?')) {
+    return;
+  }
+  try {
+    const response = await fetch(`/api/admin/routes/${routeId}`, { method: 'DELETE' });
+    if (response.ok) {
+      alert('Route deleted successfully.');
+      loadRoutes(); // Refresh the table
+    } else {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData ? errorData.message : 'Failed to delete route.');
+    }
+  } catch (error) {
+    console.error('Error deleting route:', error);
+    alert('Error: ' + error.message);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // --- Add Route Logic ---
+  const addRouteForm = document.getElementById('addRouteForm');
+  if (addRouteForm) {
+    addRouteForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const routeData = {
+        name: document.getElementById('routeName').value,
+        origin: document.getElementById('routeOrigin').value,
+        destination: document.getElementById('routeDestination').value,
+        distanceKm: parseFloat(document.getElementById('routeDistance').value)
+      };
+
+      try {
+        const response = await fetch('/api/admin/routes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(routeData)
+        });
+        if (!response.ok) throw new Error('Failed to create route.');
+
+        alert('Route added successfully!');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('addRouteModal')).hide();
+        addRouteForm.reset();
+        loadRoutes(); // Refresh
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+  }
+
+  // --- Edit Route Logic ---
+  const editRouteForm = document.getElementById('editRouteForm');
+  if (editRouteForm) {
+    // Function to open the modal
+    window.openEditRouteModal = async function(routeId) {
+      editRouteForm.dataset.routeId = routeId;
+      try {
+        const response = await fetch(`/api/admin/routes/${routeId}`);
+        if (!response.ok) throw new Error('Failed to fetch route data.');
+        const route = await response.json();
+
+        document.getElementById('editRouteName').value = route.name;
+        document.getElementById('editRouteOrigin').value = route.origin;
+        document.getElementById('editRouteDestination').value = route.destination;
+        document.getElementById('editRouteDistance').value = route.distanceKm;
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('editRouteModal')).show();
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
+
+    // Function to handle the update
+    editRouteForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const routeId = editRouteForm.dataset.routeId;
+      if (!routeId) return;
+
+      const routeData = {
+        name: document.getElementById('editRouteName').value,
+        origin: document.getElementById('editRouteOrigin').value,
+        destination: document.getElementById('editRouteDestination').value,
+        distanceKm: parseFloat(document.getElementById('editRouteDistance').value)
+      };
+
+      try {
+        const response = await fetch(`/api/admin/routes/${routeId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(routeData)
+        });
+        if (!response.ok) throw new Error('Failed to update route.');
+
+        alert('Route updated successfully!');
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('editRouteModal')).hide();
+        loadRoutes(); // Refresh
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
   }
 });
