@@ -69,9 +69,13 @@ function loadTrains() {
                         <td>${train.name}</td>
                         <td>${train.type}</td>
                         <td>${train.capacity}</td>
+                        
                         <td>
-                            <button class="btn btn-sm btn-outline-info me-2">Edit</button>
-                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                        <button class="btn btn-sm btn-outline-info" onclick="openEditTrainModal(${train.id})">Edit</button>
+                            
+    
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteTrain(${train.id})">Delete</button> 
+                           
                         </td>
                     </tr>
                 `;
@@ -434,6 +438,105 @@ document.addEventListener('DOMContentLoaded', function() {
     // Attach the submit event listener to the edit form
     if (editScheduleForm) {
       editScheduleForm.addEventListener('submit', handleUpdateSchedule);
+    }
+  }
+});
+
+// --- Delete Train Logic ---
+
+async function deleteTrain(trainId) {
+  // Show a confirmation dialog to prevent accidental deletion
+  if (!confirm('Are you sure you want to delete train ID #' + trainId + '? This might affect existing schedules.')) {
+    return; // Stop if the user clicks "Cancel"
+  }
+
+  try {
+    const response = await fetch(`/api/admin/trains/${trainId}`, {
+      method: 'DELETE'
+    });
+
+    if (response.ok) {
+      alert('Train deleted successfully.');
+      loadTrains(); // Refresh the trains table
+    } else {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData ? errorData.message : 'Failed to delete train.');
+    }
+  } catch (error) {
+    console.error('Error deleting train:', error);
+    alert('Error: ' + error.message);
+  }
+}
+
+// --- Edit Train Logic ---
+
+document.addEventListener('DOMContentLoaded', function() {
+  const editTrainForm = document.getElementById('editTrainForm');
+  const editTrainModalEl = document.getElementById('editTrainModal');
+
+  if (editTrainModalEl) {
+    const editTrainModal = new bootstrap.Modal(editTrainModalEl);
+
+    // This function is called when the user clicks the edit icon
+    window.openEditTrainModal = async function(trainId) {
+      editTrainForm.dataset.trainId = trainId;
+
+      try {
+        // Fetch the specific train's data
+        const response = await fetch(`/api/admin/trains/${trainId}`);
+        if (!response.ok) throw new Error('Failed to fetch train data.');
+
+        const train = await response.json();
+
+        // Populate the form fields with the fetched data
+        document.getElementById('editTrainName').value = train.name;
+        document.getElementById('editTrainType').value = train.type;
+        document.getElementById('editTrainCapacity').value = train.capacity;
+
+        // Show the modal
+        editTrainModal.show();
+      } catch (error) {
+        console.error("Failed to load train for editing:", error);
+        alert("Error: Could not load train data.");
+      }
+    }
+
+    // This function handles the "Save Changes" submission
+    async function handleUpdateTrain(event) {
+      event.preventDefault();
+      const trainId = editTrainForm.dataset.trainId;
+      if (!trainId) return;
+
+      const updatedTrainData = {
+        name: document.getElementById('editTrainName').value,
+        type: document.getElementById('editTrainType').value,
+        capacity: parseInt(document.getElementById('editTrainCapacity').value, 10)
+      };
+
+      try {
+        const response = await fetch(`/api/admin/trains/${trainId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedTrainData)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to update train.');
+        }
+
+        alert('Train updated successfully!');
+        editTrainModal.hide();
+        loadTrains(); // Refresh the table
+      } catch (error) {
+        console.error('Error updating train:', error);
+        alert('Error: ' + error.message);
+      }
+    }
+
+    // Attach the submit event listener to the edit form
+    if (editTrainForm) {
+      editTrainForm.addEventListener('submit', handleUpdateTrain);
     }
   }
 });
