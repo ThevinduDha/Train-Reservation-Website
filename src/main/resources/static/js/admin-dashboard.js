@@ -283,6 +283,7 @@ function loadBookings() {
               statusBadge = `<span class="badge bg-warning">Pending</span>`;
             }
 
+            // Define action buttons based on status
             let actionButtons = '';
             if (booking.paymentStatus === 'PENDING') {
               actionButtons = `
@@ -295,6 +296,9 @@ function loadBookings() {
               actionButtons = `<button class="btn btn-sm btn-success" onclick="confirmBookingPayment(${booking.id})">Confirm</button>`;
             }
 
+
+
+
             tableHtml += `
                         <tr>
                             <th scope="row">${booking.id}</th>
@@ -306,6 +310,7 @@ function loadBookings() {
                             <td>
                                 <div class="d-flex gap-2">
                                     ${actionButtons}
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteBooking(${booking.id})">Delete</button>
                                 </div>
                             </td>
                         </tr>
@@ -1011,3 +1016,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+// --- Booking Management Logic ---
+
+async function deleteBooking(bookingId) {
+  if (!confirm('Are you sure you want to permanently delete booking ID #' + bookingId + '? This action cannot be undone.')) {
+    return;
+  }
+
+  try {
+    // We use the new ADMIN endpoint
+    const response = await fetch(`/api/admin/bookings/${bookingId}`, {
+      method: 'DELETE'
+    });
+
+    if (response.ok) {
+      alert('Booking deleted successfully.');
+      loadBookings(); // Refresh the table
+    } else {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData ? errorData.message : 'Failed to delete booking.');
+    }
+  } catch (error) {
+    console.error('Error deleting booking:', error);
+    alert('Error: ' + error.message);
+  }
+}
