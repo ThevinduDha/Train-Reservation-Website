@@ -23,6 +23,7 @@
       <li><a href="/admin/dashboard" class="active"><i class="fas fa-tachometer-alt fa-fw me-2"></i>Dashboard</a></li>
       <li><a href="#" onclick="loadTrains()"><i class="fas fa-train fa-fw me-2"></i>Manage Trains</a></li>
       <li><a href="#" onclick="loadSchedules()"><i class="fas fa-calendar-alt fa-fw me-2"></i>Manage Schedules</a></li>
+      <li><a href="#" onclick="loadStations()"><i class="fas fa-building fa-fw me-2"></i>Manage Stations</a></li>
       <li><a href="#" onclick="loadBookings()"><i class="fas fa-ticket-alt fa-fw me-2"></i>View Bookings</a></li>
       <li><a href="#" onclick="loadUsers()"><i class="fas fa-users fa-fw me-2"></i>Manage Users</a></li>
     </ul>
@@ -223,6 +224,59 @@
       <div class="modal-footer border-secondary">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button type="submit" form="editTrainForm" class="btn btn-primary">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="addStationModal" tabindex="-1" aria-labelledby="addStationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title" id="addStationModalLabel">Add New Station</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addStationForm">
+          <div class="mb-3">
+            <label for="stationName" class="form-label">Station Name</label>
+            <input type="text" class="form-control" id="stationName" required placeholder="e.g., Colombo Fort">
+          </div>
+          <div class="mb-3">
+            <label for="stationCity" class="form-label">City</label>
+            <input type="text" class="form-control" id="stationCity" required placeholder="e.g., Colombo">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" form="addStationForm" class="btn btn-success">Save Station</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editStationModal" tabindex="-1" aria-labelledby="editStationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title" id="editStationModalLabel">Edit Station</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editStationForm">
+          <div class="mb-3">
+            <label for="editStationName" class="form-label">Station Name</label>
+            <input type="text" class="form-control" id="editStationName" required>
+          </div>
+          <div class="mb-3">
+            <label for="editStationCity" class="form-label">City</label>
+            <input type="text" class="form-control" id="editStationCity" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" form="editStationForm" class="btn btn-primary">Save Changes</button>
       </div>
     </div>
   </div>
