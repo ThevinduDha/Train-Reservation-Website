@@ -57,6 +57,12 @@ public class BookingController {
         return ResponseEntity.ok(service.findAll());
     }
 
+    @DeleteMapping("/admin/bookings/{id}") // For admin to delete any booking
+    public ResponseEntity<?> adminDeleteBooking(@PathVariable Long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PutMapping("/admin/bookings/{id}/confirm-payment") // For admin to CONFIRM payment
     public ResponseEntity<Booking> confirmPayment(@PathVariable Long id) {
         // later: get admin name from logged-in user
