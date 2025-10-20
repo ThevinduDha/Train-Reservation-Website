@@ -196,5 +196,36 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="editTrainModal" tabindex="-1" aria-labelledby="editTrainModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title" id="editTrainModalLabel">Edit Train</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editTrainForm">
+          <div class="mb-3">
+            <label for="editTrainName" class="form-label">Train Name</label>
+            <input type="text" class="form-control" id="editTrainName" required>
+          </div>
+          <div class="mb-3">
+            <label for="editTrainType" class="form-label">Type</label>
+            <input type="text" class="form-control" id="editTrainType" required>
+          </div>
+          <div class="mb-3">
+            <label for="editTrainCapacity" class="form-label">Capacity</label>
+            <input type="number" class="form-control" id="editTrainCapacity" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" form="editTrainForm" class="btn btn-primary">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
