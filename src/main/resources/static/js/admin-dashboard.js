@@ -239,6 +239,9 @@ async function handleAddNewTrain(event) {
 
 // Attach the event listener to the form when the page loads
 document.addEventListener('DOMContentLoaded', () => {
+  // Call the function to load the stats as soon as the page loads
+  loadDashboardStats();
+
   const addTrainForm = document.getElementById('addTrainForm');
   if (addTrainForm) {
     addTrainForm.addEventListener('submit', handleAddNewTrain);
@@ -540,3 +543,25 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 });
+
+// --- Dashboard Statistics Logic ---
+
+async function loadDashboardStats() {
+  try {
+    const response = await fetch('/api/admin/dashboard/stats');
+    if (!response.ok) {
+      throw new Error('Failed to load dashboard statistics.');
+    }
+    const stats = await response.json();
+
+    // Update the stat cards with real data
+    document.getElementById('statTotalTrains').textContent = stats.totalTrains;
+    document.getElementById('statActiveSchedules').textContent = stats.totalSchedules;
+    document.getElementById('statPendingBookings').textContent = stats.pendingBookings; // Using total bookings for now
+    document.getElementById('statRegisteredUsers').textContent = stats.totalUsers;
+
+  } catch (error) {
+    console.error(error.message);
+    // Don't show an alert, just log it. The default values will remain.
+  }
+}
