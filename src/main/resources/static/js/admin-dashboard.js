@@ -94,7 +94,65 @@ function loadTrains() {
 
 // Placeholder functions for other buttons - we will build these next!
 function loadUsers() {
-  document.getElementById('adminContent').innerHTML = '<div class="text-white">User Management Coming Soon...</div>';
+  loadContent('/api/admin/users', (users) => {
+    const contentDiv = document.getElementById('adminContent');
+
+    let tableHtml = `
+            <div class="admin-content-panel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="text-white mb-0">Manage Users</h4>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Role</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+
+    if (users.length === 0) {
+      tableHtml += '<tr><td colspan="5" class="text-center">No users found.</td></tr>';
+    } else {
+      users.forEach(user => {
+        const statusBadge = user.enabled
+            ? `<span class="badge bg-success">Enabled</span>`
+            : `<span class="badge bg-secondary">Disabled</span>`;
+
+        const toggleButtonText = user.enabled ? 'Disable' : 'Enable';
+        const toggleButtonClass = user.enabled ? 'btn-warning' : 'btn-success';
+
+        tableHtml += `
+                    <tr>
+                        <th scope="row">${user.id}</th>
+                        <td>${user.email}</td>
+                        <td>${user.role}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm ${toggleButtonClass}" onclick="toggleUserStatus(${user.id}, ${user.enabled})">${toggleButtonText}</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.id})">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+      });
+    }
+
+    tableHtml += `
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        `;
+
+    contentDiv.innerHTML = tableHtml;
+  });
 }
 
 function loadSchedules() {
@@ -563,5 +621,61 @@ async function loadDashboardStats() {
   } catch (error) {
     console.error(error.message);
     // Don't show an alert, just log it. The default values will remain.
+  }
+}
+
+// --- User Management Logic ---
+
+async function deleteUser(userId) {
+  if (!confirm('Are you sure you want to permanently delete user ID #' + userId + '? This action cannot be undone.')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/admin/users/${userId}`, {
+      method: 'DELETE'
+    });
+
+    if (response.ok) {
+      alert('User deleted successfully.');
+      loadUsers(); // Refresh the table
+    } else {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData ? errorData.message : 'Failed to delete user.');
+    }
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    alert('Error: ' + error.message);
+  }
+}
+
+async function toggleUserStatus(userId, isCurrentlyEnabled) {
+  const action = isCurrentlyEnabled ? 'disable' : 'enable';
+  if (!confirm(`Are you sure you want to ${action} user ID #${userId}?`)) {
+    return;
+  }
+
+  const updatedUserData = {
+    enabled: !isCurrentlyEnabled // Flip the status
+  };
+
+  try {
+    const response = await fetch(`/api/admin/users/${userId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedUserData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `Failed to ${action} user.`);
+    }
+
+    alert(`User ${action}d successfully!`);
+    loadUsers(); // Refresh the table
+
+  } catch (error) {
+    console.error(`Error toggling user status:`, error);
+    alert('Error: ' + error.message);
   }
 }
