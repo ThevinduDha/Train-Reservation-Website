@@ -24,6 +24,7 @@
       <li><a href="#" onclick="loadTrains()"><i class="fas fa-train fa-fw me-2"></i>Manage Trains</a></li>
       <li><a href="#" onclick="loadSchedules()"><i class="fas fa-calendar-alt fa-fw me-2"></i>Manage Schedules</a></li>
       <li><a href="#" onclick="loadStations()"><i class="fas fa-building fa-fw me-2"></i>Manage Stations</a></li>
+      <li><a href="#" onclick="loadRoutes()"><i class="fas fa-route fa-fw me-2"></i>Manage Routes</a></li>
       <li><a href="#" onclick="loadBookings()"><i class="fas fa-ticket-alt fa-fw me-2"></i>View Bookings</a></li>
       <li><a href="#" onclick="loadUsers()"><i class="fas fa-users fa-fw me-2"></i>Manage Users</a></li>
     </ul>
@@ -277,6 +278,76 @@
       <div class="modal-footer border-secondary">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         <button type="submit" form="editStationForm" class="btn btn-primary">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addRouteModal" tabindex="-1" aria-labelledby="addRouteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title" id="addRouteModalLabel">Add New Route</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addRouteForm">
+          <div class="mb-3">
+            <label for="routeName" class="form-label">Route Name</label>
+            <input type="text" class="form-control" id="routeName" required placeholder="e.g., Main Line (Colombo-Kandy)">
+          </div>
+          <div class="mb-3">
+            <label for="routeOrigin" class="form-label">Origin Station</label>
+            <input type="text" class="form-control" id="routeOrigin" required placeholder="e.g., Colombo Fort">
+          </div>
+          <div class="mb-3">
+            <label for="routeDestination" class="form-label">Destination Station</label>
+            <input type="text" class="form-control" id="routeDestination" required placeholder="e.g., Kandy">
+          </div>
+          <div class="mb-3">
+            <label for="routeDistance" class="form-label">Distance (km)</label>
+            <input type="number" step="0.1" class="form-control" id="routeDistance" required placeholder="e.g., 121.5">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" form="addRouteForm" class="btn btn-success">Save Route</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editRouteModal" tabindex="-1" aria-labelledby="editRouteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header border-secondary">
+        <h5 class="modal-title" id="editRouteModalLabel">Edit Route</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editRouteForm">
+          <div class="mb-3">
+            <label for="editRouteName" class="form-label">Route Name</label>
+            <input type="text" class="form-control" id="editRouteName" required>
+          </div>
+          <div class="mb-3">
+            <label for="editRouteOrigin" class="form-label">Origin Station</label>
+            <input type="text" class="form-control" id="editRouteOrigin" required>
+          </div>
+          <div class="mb-3">
+            <label for="editRouteDestination" class="form-label">Destination Station</label>
+            <input type="text" class="form-control" id="editRouteDestination" required>
+          </div>
+          <div class="mb-3">
+            <label for="editRouteDistance" class="form-label">Distance (km)</label>
+            <input type="number" step="0.1" class="form-control" id="editRouteDistance" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer border-secondary">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" form="editRouteForm" class="btn btn-primary">Save Changes</button>
       </div>
     </div>
   </div>
