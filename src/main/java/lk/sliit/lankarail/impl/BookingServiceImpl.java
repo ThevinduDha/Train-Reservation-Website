@@ -110,6 +110,11 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    public List<Booking> findByUserId(Long userId) {
+        return repo.findByUserId(userId);
+    }
+
+    @Override
     public void delete(Long id) {
         repo.deleteById(id);
     }

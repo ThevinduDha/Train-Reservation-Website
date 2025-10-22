@@ -8,6 +8,7 @@ public interface BookingService {
     Booking create(Booking booking);
     Booking findById(Long id);
     List<Booking> findAll();
+    List<Booking> findByUserId(Long userId);
     Booking update(Long id, Booking booking); // mainly update seats or status
     void delete(Long id);
 
