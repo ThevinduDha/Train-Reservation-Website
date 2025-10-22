@@ -6,6 +6,9 @@ import lk.sliit.lankarail.repository.ScheduleRepository;
 import lk.sliit.lankarail.repository.TrainRepository;
 import lk.sliit.lankarail.service.ScheduleService;
 import org.springframework.stereotype.Service;
+import java.time.LocalDate; // Add this import
+import java.util.List; // Add this import
+
 
 import java.util.List;
 
@@ -19,6 +22,15 @@ public class ScheduleServiceImpl implements ScheduleService {
         this.repo = repo;
         this.trainRepo = trainRepo;
     }
+
+    @Override
+    public List<Schedule> searchSchedules(String origin, String destination, LocalDate date) {
+        if (origin == null || destination == null || date == null) {
+            throw new IllegalArgumentException("Origin, destination, and date are required for search.");
+        }
+        return repo.findByOriginDestinationAndDate(origin, destination, date);
+    }
+
 
     @Override
     public Schedule create(Schedule schedule) {
