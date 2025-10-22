@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>LankaRail — Your Ticket</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        /* Custom styles for the ticket */
+        .ticket-card {
+            max-width: 600px;
+            margin: 40px auto;
+            border: 2px dashed #0b4f4f;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        .ticket-header {
+            background-color: #0b4f4f;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<!-- Background -->
+<div class="hero-bg" style="background-image: url('/images/dashboard-hero.jpg');"></div>
+<div class="hero-overlay"></div>
+
+<!-- Topbar (same as passenger dashboard) -->
+<div class="topbar">
+    <nav class="navbar navbar-light w-100">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" th:href="@{/passenger/dashboard}">
+                <img src="/images/logo.png" alt="LankaRail" class="logo-img me-2">
+                <span class="brand-text">LankaRail</span>
+            </a>
+            <a class="btn btn-outline-primary" th:href="@{/passenger/dashboard}">Back to Dashboard</a>
+        </div>
+    </nav>
+</div>
+
+<!-- Page Content -->
+<div class="page-inner content-offset">
+    <div class="card ticket-card animate-fade-in">
+        <div class="card-header ticket-header text-center">
+            <h4 class="mb-0">Train E-Ticket</h4>
+        </div>
+        <div class="card-body p-4">
+            <!-- Display Booking Details if 'booking' object is passed from controller -->
+            <div th:if="${booking}">
+                <h5 class="card-title">Booking ID: #<span th:text="${booking.id}">123</span></h5>
+                <hr>
+                <div class="row">
+                    <div class="col-6">
+                        <p class="mb-1"><strong>Schedule ID:</strong></p>
+                        <p th:text="${booking.scheduleId}">S45</p>
+                    </div>
+                    <div class="col-6">
+                        <p class="mb-1"><strong>Passenger ID:</strong></p>
+                        <p th:text="${booking.userId}">U78</p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-6">
+                        <p class="mb-1"><strong>Seats Booked:</strong></p>
+                        <p class="fs-4 fw-bold" th:text="${booking.seats}">2</p>
+                    </div>
+                    <div class="col-6">
+                        <p class="mb-1"><strong>Total Price:</strong></p>
+                        <p class="fs-4 fw-bold" th:text="'LKR ' + ${#numbers.formatDecimal(booking.totalPrice, 1, 'COMMA', 2, 'POINT')}">LKR 2,400.00</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <p class="mb-1"><strong>Booking Status:</strong></p>
+                    <p><span class="badge bg-success fs-6" th:text="${booking.status}">CONFIRMED</span></p>
+                </div>
+                <div class="text-center mt-4">
+                    <!-- Placeholder for QR Code -->
+                    <img src="https://placehold.co/150x150/eee/ccc?text=QR+Code" alt="QR Code">
+                </div>
+            </div>
+            <!-- Display error message if 'booking' object is not found -->
+            <div th:if="${booking == null}" class="alert alert-danger">
+                Ticket not found or you do not have permission to view it.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

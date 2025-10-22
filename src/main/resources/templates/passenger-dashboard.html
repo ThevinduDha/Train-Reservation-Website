@@ -30,21 +30,62 @@
 
 <div class="page-inner content-offset">
 
-  <div class="dashboard-panel animate-fade-in">
-    <div class="dashboard-header">
-      <div>
-        <h2>My bookings</h2>
-        <div class="lead">Manage your reservations and tickets.</div>
+  <div class="search-panel glass-card p-4 mb-4 animate-fade-in">
+    <h3 class="mb-3 text-white">Find Your Journey</h3>
+    <form id="searchScheduleForm" class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label for="searchOrigin" class="form-label text-white">From</label>
+        <input type="text" class="form-control" id="searchOrigin" placeholder="e.g., Colombo Fort" required>
       </div>
-      <div>
-        <button id="newBookingBtn" class="btn btn-primary">Create booking</button>
+      <div class="col-md-4">
+        <label for="searchDestination" class="form-label text-white">To</label>
+        <input type="text" class="form-control" id="searchDestination" placeholder="e.g., Kandy" required>
+      </div>
+      <div class="col-md-3">
+        <label for="searchDate" class="form-label text-white">Date</label>
+        <input type="date" class="form-control" id="searchDate" required>
+      </div>
+      <div class="col-md-1">
+        <button type="submit" class="btn btn-primary w-100">Search</button>
+      </div>
+    </form>
+  </div>
+  <div id="searchResultsArea" class="mb-4">
+  </div>
+  <!-- == Main Content Grid (Bookings & Stations) == -->
+  <div class="row gx-4">
+    <div class="col-lg-8">
+      <!-- MY BOOKINGS SECTION -->
+      <div class="dashboard-panel animate-fade-in">
+        <div class="dashboard-header">
+          <div>
+            <h2>My Bookings</h2>
+            <div class="lead">Manage your reservations and tickets.</div>
+          </div>
+          <!-- The "Create Booking" button in this header is now less useful with the search bar -->
+          <!-- We can leave it or remove it. For now, let's leave it. -->
+        </div>
+        <div id="bookingsArea" class="bookings-list">
+          <div id="loadingMsg" class="text-muted">Loading bookings…</div>
+        </div>
       </div>
     </div>
-
-    <div id="bookingsArea" class="bookings-list">
-      <div id="loadingMsg" class="text-muted">Loading bookings…</div>
+    <div class="col-lg-4">
+      <!-- NEW STATION DIRECTORY SECTION -->
+      <div class="dashboard-panel animate-fade-in">
+        <div class="dashboard-header">
+          <div>
+            <h2>Station Directory</h2>
+            <div class="lead">All available stations.</div>
+          </div>
+        </div>
+        <div id="stationDirectoryArea" class="station-list">
+          <div class="text-muted">Loading stations...</div>
+        </div>
+      </div>
     </div>
   </div>
+  <!-- == End of Main Content Grid == -->
 </div>
 
 <div class="modal fade" id="createBookingModal" tabindex="-1" aria-labelledby="createBookingModalLabel" aria-hidden="true">
