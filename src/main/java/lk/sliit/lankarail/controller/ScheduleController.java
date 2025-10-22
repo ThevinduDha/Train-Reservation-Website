@@ -5,6 +5,8 @@ import lk.sliit.lankarail.model.Schedule;
 import lk.sliit.lankarail.service.ScheduleService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.List;
 
@@ -23,6 +25,13 @@ public class ScheduleController {
     @GetMapping("/schedules") // NEW: This is the public endpoint for passengers
     public ResponseEntity<List<Schedule>> getAvailableSchedules() {
         return ResponseEntity.ok(service.findAll());
+    }
+    @GetMapping("/schedules/search")
+    public ResponseEntity<List<Schedule>> search(
+            @RequestParam String from,
+            @RequestParam String to,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        return ResponseEntity.ok(service.searchSchedules(from, to, date));
     }
 
     // --- ADMIN Endpoints ---

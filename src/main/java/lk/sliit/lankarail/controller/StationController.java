@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/stations") // Changed to /api/admin/stations
+@RequestMapping("/api") // Changed to /api
 public class StationController {
 
     private final StationService service;
@@ -18,30 +18,35 @@ public class StationController {
         this.service = service;
     }
 
-    @PostMapping
-    //@PreAuthorize("hasRole('ADMIN')") // uncomment when securing
+    // --- PUBLIC Endpoint ---
+    @GetMapping("/stations") // NEW: Public endpoint for passengers
+    public ResponseEntity<List<Station>> publicFindAll() {
+        return ResponseEntity.ok(service.findAll());
+    }
+
+
+    // --- ADMIN Endpoints ---
+    @PostMapping("/admin/stations")
     public ResponseEntity<Station> create(@Valid @RequestBody Station station) {
         return ResponseEntity.ok(service.create(station));
     }
 
-    @GetMapping
+    @GetMapping("/admin/stations")
     public ResponseEntity<List<Station>> all() {
         return ResponseEntity.ok(service.findAll());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/admin/stations/{id}")
     public ResponseEntity<Station> one(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
-    @PutMapping("/{id}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/admin/stations/{id}")
     public ResponseEntity<Station> update(@PathVariable Long id, @Valid @RequestBody Station station) {
         return ResponseEntity.ok(service.update(id, station));
     }
 
-    @DeleteMapping("/{id}")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/admin/stations/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();

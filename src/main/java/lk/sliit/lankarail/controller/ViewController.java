@@ -1,10 +1,22 @@
 package lk.sliit.lankarail.controller;
 
+import lk.sliit.lankarail.model.Booking;
+import lk.sliit.lankarail.service.BookingService;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class ViewController {
+
+    // ADD THIS FIELD
+    private final BookingService bookingService;
+
+    // UPDATE THE CONSTRUCTOR TO ACCEPT BookingService
+    public ViewController(BookingService bookingService) {
+        this.bookingService = bookingService;
+    }
 
     // Serves the main login/signup page (or a future homepage)
     @GetMapping("/")
@@ -27,19 +39,26 @@ public class ViewController {
         return "admin"; // Renders admin.html
     }
 
-
     @GetMapping("/admin/dashboard")
     public String adminDashboardPage() {
         return "admin-dashboard"; // Renders admin-dashboard.html
     }
-
 
     @GetMapping("/passenger/dashboard")
     public String passengerDashboardPage() {
         return "passenger-dashboard"; // Renders passenger-dashboard.html
     }
 
-    // Note: We don't need mappings for admin-dashboard or passenger-dashboard here.
-    // Spring Security will handle redirecting to them after a successful login.
-    // However, if you add direct links to them, you would add them here.
+    // THE METHOD WE ADDED IN THE LAST STEP
+    @GetMapping("/ticket")
+    public String ticketPage(@RequestParam Long id, Model model) {
+        try {
+            // This now works because bookingService is available
+            Booking booking = bookingService.findById(id);
+            model.addAttribute("booking", booking);
+            return "ticket"; // This will render ticket.html
+        } catch (Exception e) {
+            return "redirect:/passenger/dashboard";
+        }
+    }
 }
