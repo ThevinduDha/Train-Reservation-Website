@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/trains") // Changed here
+@RequestMapping("/api") // Changed base mapping to /api
 public class TrainController {
 
     private final TrainService service;
@@ -18,32 +18,35 @@ public class TrainController {
         this.service = service;
     }
 
-    // Create
-    @PostMapping
+    // --- PUBLIC Endpoint for Passengers ---
+    @GetMapping("/trains") // NEW: Public endpoint to get all trains
+    public ResponseEntity<List<Train>> getAllTrainsPublic() {
+        // You might want to create a DTO later to only send necessary info (id, name)
+        return ResponseEntity.ok(service.findAll());
+    }
+
+    // --- ADMIN Endpoints ---
+    @PostMapping("/admin/trains")
     public ResponseEntity<Train> create(@Valid @RequestBody Train train) {
         return ResponseEntity.ok(service.create(train));
     }
 
-    // Read all
-    @GetMapping
-    public ResponseEntity<List<Train>> all() {
+    @GetMapping("/admin/trains") // Keep admin endpoint for consistency if needed elsewhere
+    public ResponseEntity<List<Train>> allAdmin() {
         return ResponseEntity.ok(service.findAll());
     }
 
-    // Read one
-    @GetMapping("/{id}")
+    @GetMapping("/admin/trains/{id}")
     public ResponseEntity<Train> one(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
-    // Update
-    @PutMapping("/{id}")
+    @PutMapping("/admin/trains/{id}")
     public ResponseEntity<Train> update(@PathVariable Long id, @Valid @RequestBody Train train) {
         return ResponseEntity.ok(service.update(id, train));
     }
 
-    // Delete
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/trains/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
