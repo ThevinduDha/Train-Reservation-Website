@@ -438,3 +438,18 @@ body {
 #adminContent {
   max-width: 100% !important; /* !important ensures it overrides other styles */
 }
+
+/* Styles for Passenger Search Panel */
+.search-panel {
+  max-width: 1100px; /* Match dashboard panel width */
+  margin: 28px auto;
+  background: rgba(10,10,10,0.65); /* Slightly darker glass */
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+}
+
+.search-panel label {
+  font-weight: 500;
+}
