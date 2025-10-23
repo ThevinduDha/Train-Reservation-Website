@@ -64,6 +64,7 @@ function loadUsers() {
             <div class="admin-content-panel">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="text-white mb-0">Manage Users</h4>
+<button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addAdminModal">+ Add New Admin</button>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-dark table-striped table-hover">
@@ -551,6 +552,7 @@ async function deleteBooking(bookingId) {
     loadBookings();
   } catch (error) { alert('Error: ' + error.message); }
 }
+
 
 // Dashboard Stats
 async function loadDashboardStats() {
