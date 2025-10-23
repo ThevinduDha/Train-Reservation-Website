@@ -31,10 +31,25 @@
     <div class="wide-search-container animate-fade-in mb-4">
       <h2 class="mb-3">Find Your Journey</h2>
       <form id="searchScheduleForm" class="row g-2 align-items-end glass-card p-3">
-        <div class="col-md-4"><label for="searchOrigin" class="form-label visually-hidden">From</label><input type="text" class="form-control" id="searchOrigin" placeholder="From Station" required></div>
-        <div class="col-md-4"><label for="searchDestination" class="form-label visually-hidden">To</label><input type="text" class="form-control" id="searchDestination" placeholder="To Station" required></div>
-        <div class="col-md-2"><label for="searchDate" class="form-label visually-hidden">Date</label><input type="date" class="form-control" id="searchDate" required></div>
-        <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Search</button></div>
+        <div class="col-md-4">
+          <label for="searchOriginSelect" class="form-label visually-hidden">From</label>
+          <select id="searchOriginSelect" class="form-select" required>
+            <option value="" selected disabled>Loading stations...</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label for="searchDestinationSelect" class="form-label visually-hidden">To</label>
+          <select id="searchDestinationSelect" class="form-select" required>
+            <option value="" selected disabled>Loading stations...</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label for="searchDate" class="form-label visually-hidden">Date</label>
+          <input type="date" class="form-control" id="searchDate" required>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">Search</button>
+        </div>
       </form>
     </div>
 
