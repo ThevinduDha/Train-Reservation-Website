@@ -23,6 +23,45 @@ async function setupUserInfo() {
   }
 }
 
+// ---= POPULATE STATION DROPDOWNS =---
+async function populateStationDropdowns() {
+  const originSelect = document.getElementById('searchOriginSelect');
+  const destSelect = document.getElementById('searchDestinationSelect');
+  if (!originSelect || !destSelect) return;
+
+  try {
+    const res = await fetch('/api/stations'); // Fetch all stations
+    if (!res.ok) throw new Error('Failed to fetch stations');
+    const stations = await res.json();
+
+    originSelect.innerHTML = '<option value="" selected disabled>From Station</option>';
+    destSelect.innerHTML = '<option value="" selected disabled>To Station</option>';
+
+    // Use a Set to avoid duplicate station names in dropdowns
+    const uniqueStationNames = new Set();
+    stations.forEach(station => {
+      uniqueStationNames.add(station.name.trim());
+    });
+
+    uniqueStationNames.forEach(name => {
+      const option1 = document.createElement('option');
+      option1.value = name;
+      option1.textContent = name;
+      originSelect.appendChild(option1);
+
+      const option2 = document.createElement('option');
+      option2.value = name;
+      option2.textContent = name;
+      destSelect.appendChild(option2);
+    });
+
+  } catch (err) {
+    console.error("Error populating station dropdowns:", err);
+    originSelect.innerHTML = '<option value="" disabled>Error loading</option>';
+    destSelect.innerHTML = '<option value="" disabled>Error loading</option>';
+  }
+}
+
 // ---= VIEW/PANEL NAVIGATION =---
 function setActiveSidebarLink(targetOnClick) {
   document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
@@ -206,14 +245,27 @@ async function handlePayNow(event) {
 }
 
 // ---= SEARCH & ALL JOURNEYS =---
+// ---= SEARCH & ALL JOURNEYS =---
 async function handleSearchSubmit(event) {
   event.preventDefault();
   setActiveSidebarLink("showMyBookingsView()");
-  const origin = document.getElementById('searchOrigin').value.trim();
-  const destination = document.getElementById('searchDestination').value.trim();
+
+  // *** UPDATED to read from select dropdowns ***
+  const origin = document.getElementById('searchOriginSelect').value;
+  const destination = document.getElementById('searchDestinationSelect').value;
   const date = document.getElementById('searchDate').value;
+
   const resultsArea = document.getElementById('dynamicContentArea');
-  if (!origin || !destination || !date) { showMsg('Please enter all fields.'); return; }
+
+  if (!origin || !destination || !date) {
+    showMsg('Please select an origin, destination, and date.');
+    return;
+  }
+  if (origin === destination) {
+    showMsg('Origin and destination cannot be the same.');
+    return;
+  }
+
   resultsArea.innerHTML = `<div class="d-flex justify-content-center text-white p-3"><div class="spinner-border"></div><span class="ms-2">Searching...</span></div>`;
   try {
     const url = `/api/schedules/search?from=${encodeURIComponent(origin)}&to=${encodeURIComponent(destination)}&date=${encodeURIComponent(date)}`;
@@ -226,7 +278,6 @@ async function handleSearchSubmit(event) {
     resultsArea.innerHTML = `<div class="alert alert-warning">${err.message}</div>`;
   }
 }
-
 async function loadAllSchedules() {
   const area = document.getElementById('allSchedulesArea');
   if (!area) return;
@@ -243,7 +294,10 @@ async function loadAllSchedules() {
 }
 
 async function renderSearchResults(schedules, title, targetArea) {
-  if (!targetArea) { console.error("Target area missing for search results!"); return; }
+  if (!targetArea) { // Safety check
+    console.error("Target area for rendering search results is missing!");
+    return;
+  }
   if (!schedules || !schedules.length) {
     targetArea.innerHTML = `<div class="alert alert-info text-center bg-transparent text-white border-secondary">No trains found matching your criteria.</div>`;
     return;
@@ -251,17 +305,32 @@ async function renderSearchResults(schedules, title, targetArea) {
   const trains = await fetch('/api/trains').then(r => r.ok ? r.json() : []).catch(err => { console.error("Failed to fetch trains:", err); return []; });
   const trainMap = new Map(trains.map(t => [t.id, t.name]));
   let html = `<div class="glass-card p-3 animate-fade-in"><h3 class="text-white mb-3">${title}</h3>`;
+
   schedules.forEach(s => {
     const trainName = trainMap.get(s.trainId) || 'Unknown';
-    const departureTime = new Date(s.departureTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-    const arrivalTime = new Date(s.arrivalTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    // --- UPDATED DATE/TIME LOGIC ---
+    const departureDateTime = new Date(s.departureTime);
+    const arrivalDateTime = new Date(s.arrivalTime);
+
+    const departureDateStr = departureDateTime.toLocaleDateString([], {
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    });
+    const departureTimeStr = departureDateTime.toLocaleTimeString([], {
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+    const arrivalTimeStr = arrivalDateTime.toLocaleTimeString([], {
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+    // --- END OF UPDATED LOGIC ---
+
     html += `
             <div class="list-group-item list-group-item-action bg-transparent text-white d-flex justify-content-between align-items-center mb-2 border-secondary p-3">
                 <div class="w-75">
                     <h5 class="mb-1">${escapeHtml(trainName)}</h5>
-                    <!-- *** THIS IS THE CORRECTED LINE *** -->
                     <p class="mb-1">${escapeHtml(s.departureStation)} <i class="fas fa-long-arrow-alt-right"></i> ${escapeHtml(s.arrivalStation)}</p>
-                    <small>Departs: ${departureTime} | Arrives: ${arrivalTime}</small>
+                    
+                    <small><strong>Date: ${departureDateStr}</strong><br>Departs: ${departureTimeStr} | Arrives: ${arrivalTimeStr}</small>
                 </div>
                 <div class="text-end">
                     <span class="d-block fw-bold fs-5">LKR ${s.price.toFixed(2)}</span>
@@ -271,7 +340,7 @@ async function renderSearchResults(schedules, title, targetArea) {
   });
   html += `</div>`;
   targetArea.innerHTML = html;
-  attachSearchResultsBookingListeners(targetArea); // Attach listeners here
+  attachSearchResultsBookingListeners(targetArea);
 }
 
 
@@ -353,6 +422,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   await setupUserInfo(); // Wait for user info
 
+  populateStationDropdowns();
   // Attach listeners for static elements
   document.getElementById('logoutBtn')?.addEventListener('click', handleLogout);
   document.getElementById('searchScheduleForm')?.addEventListener('submit', handleSearchSubmit);
@@ -372,4 +442,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Load initial view
   showMyBookingsView();
 });
+
+
 
