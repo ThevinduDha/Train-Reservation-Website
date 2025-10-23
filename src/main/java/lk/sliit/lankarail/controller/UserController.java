@@ -14,7 +14,7 @@ import java.util.List;
  * General user functions (like /me) are under /api/users
  */
 @RestController
-@RequestMapping("/api") // Changed to /api
+@RequestMapping("/api")
 public class UserController {
 
     private final UserService service;
@@ -24,16 +24,15 @@ public class UserController {
     }
 
     // List all users (ADMIN ONLY)
-    @GetMapping("/admin/users") // Changed to /admin/users
+    @GetMapping("/admin/users")
     public ResponseEntity<List<User>> all() {
         List<User> users = service.findAll();
-        // ensure we do not leak passwords
         users.forEach(u -> u.setPassword(null));
         return ResponseEntity.ok(users);
     }
 
     // Get one user by id (ADMIN ONLY)
-    @GetMapping("/admin/users/{id}") // Changed to /admin/users/{id}
+    @GetMapping("/admin/users/{id}")
     public ResponseEntity<User> one(@PathVariable Long id) {
         User u = service.findById(id);
         u.setPassword(null);
@@ -41,7 +40,8 @@ public class UserController {
     }
 
     // Update user (ADMIN ONLY)
-    @PutMapping("/admin/users/{id}") // Changed to /admin/users/{id}
+    // NOTE: Removed @Valid intentionally for partial updates (e.g., enable/disable)
+    @PutMapping("/admin/users/{id}")
     public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User user) {
         User updated = service.update(id, user);
         updated.setPassword(null);
@@ -49,7 +49,7 @@ public class UserController {
     }
 
     // Delete user (ADMIN ONLY)
-    @DeleteMapping("/admin/users/{id}") // Changed to /admin/users/{id}
+    @DeleteMapping("/admin/users/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
@@ -57,18 +57,15 @@ public class UserController {
 
     /**
      * Return the currently authenticated user's basic info.
-     * This path remains /api/users/me and is protected by SecurityConfig
      */
-    @GetMapping("/users/me") // Changed to /users/me
+    @GetMapping("/users/me")
     public ResponseEntity<?> me(Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {
             return ResponseEntity.status(401).body("Not authenticated");
         }
-
         String email = authentication.getName();
         User u = service.findByEmail(email);
         if (u == null) {
-            // fallback: return minimal info
             return ResponseEntity.ok().body(java.util.Map.of("email", email));
         }
         u.setPassword(null);
