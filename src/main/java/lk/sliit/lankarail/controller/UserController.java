@@ -1,5 +1,6 @@
 package lk.sliit.lankarail.controller;
 
+import jakarta.validation.Valid; // ADD THIS IMPORT
 import lk.sliit.lankarail.model.User;
 import lk.sliit.lankarail.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -8,11 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * UserController - Manages user-related endpoints.
- * Admin functions are grouped under /api/admin/users
- * General user functions (like /me) are under /api/users
- */
 @RestController
 @RequestMapping("/api")
 public class UserController {
@@ -31,6 +27,13 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
+    // NEW ENDPOINT FOR CREATING ADMINS
+    @PostMapping("/admin/users/create-admin")
+    public ResponseEntity<User> createAdminUser(@Valid @RequestBody User newUser) {
+        User createdAdmin = service.createAdmin(newUser);
+        return ResponseEntity.ok(createdAdmin);
+    }
+
     // Get one user by id (ADMIN ONLY)
     @GetMapping("/admin/users/{id}")
     public ResponseEntity<User> one(@PathVariable Long id) {
@@ -40,7 +43,6 @@ public class UserController {
     }
 
     // Update user (ADMIN ONLY)
-    // NOTE: Removed @Valid intentionally for partial updates (e.g., enable/disable)
     @PutMapping("/admin/users/{id}")
     public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User user) {
         User updated = service.update(id, user);
@@ -55,9 +57,6 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Return the currently authenticated user's basic info.
-     */
     @GetMapping("/users/me")
     public ResponseEntity<?> me(Authentication authentication) {
         if (authentication == null || authentication.getName() == null) {

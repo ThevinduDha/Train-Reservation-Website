@@ -3,8 +3,7 @@ package lk.sliit.lankarail.impl;
 import lk.sliit.lankarail.model.User;
 import lk.sliit.lankarail.repository.UserRepository;
 import lk.sliit.lankarail.service.UserService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder; // Ensure PasswordEncoder is imported
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,10 +11,8 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository repo;
-    // Use PasswordEncoder interface for flexibility
     private final PasswordEncoder encoder;
 
-    // Inject PasswordEncoder
     public UserServiceImpl(UserRepository repo, PasswordEncoder encoder) {
         this.repo = repo;
         this.encoder = encoder;
@@ -31,14 +28,30 @@ public class UserServiceImpl implements UserService {
         }
         user.setPassword(encoder.encode(user.getPassword())); // hash password
         if (user.getRole() == null || user.getRole().isBlank()) {
-            user.setRole("ROLE_MEMBER"); // default role if blank or null
+            user.setRole("ROLE_MEMBER"); // default role
         } else if (!user.getRole().startsWith("ROLE_")) {
-            // Optionally enforce ROLE_ prefix if needed by Spring Security
             user.setRole("ROLE_" + user.getRole().toUpperCase());
         }
-        user.setEnabled(true); // Ensure user is enabled by default
+        user.setEnabled(true);
         User saved = repo.save(user);
         saved.setPassword(null);
+        return saved;
+    }
+
+    // ADD THIS NEW METHOD
+    @Override
+    public User createAdmin(User user) {
+        if (user.getEmail() == null || user.getPassword() == null) {
+            throw new IllegalArgumentException("Email and password are required for admin creation");
+        }
+        if (repo.existsByEmail(user.getEmail())) {
+            throw new RuntimeException("Email already exists: " + user.getEmail());
+        }
+        user.setPassword(encoder.encode(user.getPassword())); // Hash password
+        user.setRole("ROLE_ADMIN"); // Explicitly set role
+        user.setEnabled(true); // Ensure admin is enabled
+        User saved = repo.save(user);
+        saved.setPassword(null); // Don't return password hash
         return saved;
     }
 
@@ -61,24 +74,19 @@ public class UserServiceImpl implements UserService {
     public User update(Long id, User user) {
         User existing = repo.findById(id).orElseThrow(() -> new RuntimeException("User not found: " + id));
 
-        // Only update fields that are provided in the request
         if (user.getEmail() != null && !user.getEmail().isBlank()) {
-            // Optional: Add check if new email already exists if changing email is allowed
             existing.setEmail(user.getEmail());
         }
-        // Only hash and update password if a new one is provided
         if (user.getPassword() != null && !user.getPassword().isBlank()) {
             existing.setPassword(encoder.encode(user.getPassword()));
         }
         if (user.getRole() != null && !user.getRole().isBlank()) {
-            // Optional: Enforce ROLE_ prefix
             String role = user.getRole();
             if (!role.startsWith("ROLE_")) {
                 role = "ROLE_" + role.toUpperCase();
             }
             existing.setRole(role);
         }
-        // Always allow updating the enabled status
         existing.setEnabled(user.isEnabled());
 
         User saved = repo.save(existing);
@@ -97,7 +105,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByEmail(String email) {
-        // Return null if not found, don't throw exception here
         return repo.findByEmail(email).orElse(null);
     }
 }
