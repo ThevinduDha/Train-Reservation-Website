@@ -1,4 +1,4 @@
-// passenger-dashboard.js V7.1 (Ensuring all functions are present)
+// passenger-dashboard.js V7.3 (Fixes 'undefined' in search results)
 
 // ---= UTILITIES =---
 function showMsg(msg, type = 'info') { alert(msg); }
@@ -19,8 +19,7 @@ async function setupUserInfo() {
     console.log("User ID set:", currentUserId);
   } catch (err) {
     console.error('Failed to fetch user info:', err);
-    // Don't redirect immediately, let other parts load, handle errors later if needed
-    // window.location.href = '/login';
+    window.location.href = '/login';
   }
 }
 
@@ -34,7 +33,7 @@ function setActiveSidebarLink(targetOnClick) {
 function showMyBookingsView() {
   setActiveSidebarLink("showMyBookingsView()");
   const dynamicArea = document.getElementById('dynamicContentArea');
-  if (!dynamicArea) return; // Safety check
+  if (!dynamicArea) return;
   dynamicArea.innerHTML = `
         <div id="myBookingsPanel" class="animate-fade-in">
             <h3 class="mb-3 text-white">My Bookings</h3>
@@ -87,7 +86,7 @@ async function loadStationDirectory() {
     if (!res.ok) throw new Error('Could not fetch stations.');
     const stations = await res.json();
     if (stations.length === 0) {
-      area.innerHTML = '<div class="alert alert-info bg-transparent text-white border-secondary">No stations added yet.</div>';
+      area.innerHTML = '<div class="alert alert-info bg-transparent text-white border-secondary">No stations have been added yet.</div>';
       return;
     }
     const uniqueStationNames = new Set();
@@ -111,35 +110,23 @@ async function loadStationDirectory() {
   }
 }
 
-
-// ---= MY BOOKINGS (with PAY NOW & Cache Control) =---
+// ---= MY BOOKINGS =---
 async function loadBookings() {
   const area = document.getElementById('bookingsArea');
   if (!area) return;
-  area.innerHTML = `<div class="d-flex justify-content-center text-white p-3"><div class="spinner-border spinner-border-sm" role="status"></div><span class="ms-2">Loading bookings...</span></div>`; // Added spinner
   try {
-    const headers = await authHeaders();
-    // *** ADD CACHE CONTROL HEADERS ***
-    headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
-    headers['Pragma'] = 'no-cache';
-    headers['Expires'] = '0';
-
-    const res = await fetch('/api/bookings/my-bookings', {
-      headers: headers, // Use updated headers
-      credentials: 'same-origin'
-    });
-
+    const res = await fetch('/api/bookings/my-bookings', { headers: await authHeaders(), credentials: 'same-origin' });
     if (res.status === 401) { window.location.href = '/login'; return; }
     if (!res.ok) throw new Error(await res.text());
     const bookings = await res.json();
     await renderBookings(bookings, area);
   } catch (err) {
-    console.error("Error loading bookings:", err); // Log error
     area.innerHTML = `<div class="text-danger">Error loading bookings: ${err.message}</div>`;
   }
 }
+
 async function renderBookings(bookings, targetArea) {
-  if (!targetArea) return; // Safety check
+  if (!targetArea) return;
   if (!bookings || !bookings.length) {
     targetArea.innerHTML = '<div class="alert alert-info bg-transparent text-white border-secondary">You have no bookings yet.</div>';
     return;
@@ -178,7 +165,7 @@ async function renderBookings(bookings, targetArea) {
             </div>`;
   });
   targetArea.innerHTML = html;
-  attachBookingActionListeners(targetArea); // Crucial: Attach listeners AFTER rendering
+  attachBookingActionListeners(targetArea);
 }
 
 function attachBookingActionListeners(area) {
@@ -199,7 +186,6 @@ async function handleCancelBooking(event) {
   } catch (err) { showMsg('Error: ' + err.message); }
 }
 
-// *** ENSURE THIS FUNCTION IS DEFINED IN THE GLOBAL SCOPE ***
 function handleViewTicket(event) {
   const bookingId = event.target.getAttribute('data-booking-id');
   window.location.href = `/ticket?id=${bookingId}`;
@@ -216,7 +202,7 @@ async function handlePayNow(event) {
     if (!res.ok) throw new Error(await res.text() || `Failed to submit (Status: ${res.status})`);
     showMsg('Payment submitted for confirmation.');
     loadBookings();
-  } catch (err) { showMsg('Error: ' + err.message); loadBookings(); } // Reload on error too
+  } catch (err) { showMsg('Error: ' + err.message); loadBookings(); }
 }
 
 // ---= SEARCH & ALL JOURNEYS =---
@@ -257,18 +243,13 @@ async function loadAllSchedules() {
 }
 
 async function renderSearchResults(schedules, title, targetArea) {
-  if (!targetArea) { // Safety check
-    console.error("Target area for rendering search results is missing!");
-    return;
-  }
+  if (!targetArea) { console.error("Target area missing for search results!"); return; }
   if (!schedules || !schedules.length) {
     targetArea.innerHTML = `<div class="alert alert-info text-center bg-transparent text-white border-secondary">No trains found matching your criteria.</div>`;
     return;
   }
-  // Fetch trains safely
   const trains = await fetch('/api/trains').then(r => r.ok ? r.json() : []).catch(err => { console.error("Failed to fetch trains:", err); return []; });
   const trainMap = new Map(trains.map(t => [t.id, t.name]));
-
   let html = `<div class="glass-card p-3 animate-fade-in"><h3 class="text-white mb-3">${title}</h3>`;
   schedules.forEach(s => {
     const trainName = trainMap.get(s.trainId) || 'Unknown';
@@ -278,7 +259,7 @@ async function renderSearchResults(schedules, title, targetArea) {
             <div class="list-group-item list-group-item-action bg-transparent text-white d-flex justify-content-between align-items-center mb-2 border-secondary p-3">
                 <div class="w-75">
                     <h5 class="mb-1">${escapeHtml(trainName)}</h5>
-                    
+                    <!-- *** THIS IS THE CORRECTED LINE *** -->
                     <p class="mb-1">${escapeHtml(s.departureStation)} <i class="fas fa-long-arrow-alt-right"></i> ${escapeHtml(s.arrivalStation)}</p>
                     <small>Departs: ${departureTime} | Arrives: ${arrivalTime}</small>
                 </div>
@@ -290,14 +271,15 @@ async function renderSearchResults(schedules, title, targetArea) {
   });
   html += `</div>`;
   targetArea.innerHTML = html;
-  attachSearchResultsBookingListeners(targetArea); // Re-attach listeners
+  attachSearchResultsBookingListeners(targetArea); // Attach listeners here
 }
 
+
 // ---= BOOKING MODAL & SUBMISSION =---
-function attachSearchResultsBookingListeners(area) { // Renamed for clarity
+function attachSearchResultsBookingListeners(area) {
   if (!area) return;
   area.querySelectorAll('.book-now-btn').forEach(btn => {
-    btn.removeEventListener('click', handleBookNowClick); // Prevent duplicates
+    btn.removeEventListener('click', handleBookNowClick);
     btn.addEventListener('click', handleBookNowClick);
   });
 }
@@ -320,7 +302,6 @@ function openBookingModalForSchedule(scheduleId) {
   bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
 
-// *** ENSURE THIS FUNCTION IS DEFINED IN THE GLOBAL SCOPE ***
 async function handleCreateBooking(event) {
   event.preventDefault();
   console.log("handleCreateBooking triggered");
@@ -332,7 +313,13 @@ async function handleCreateBooking(event) {
   const seats = seatsInput ? parseInt(seatsInput.value || '1', 10) : 1;
   console.log("Booking - UserID:", currentUserId, "ScheduleID:", scheduleId, "Seats:", seats);
 
-  if (!scheduleId) { showMsg('Error: Could not determine journey. Please select again.'); return; }
+  if (!scheduleId) {
+    showMsg('Error: Could not determine journey. Please select again.');
+    console.error("scheduleId missing from form dataset in handleCreateBooking");
+    const modalInstance = bootstrap.Modal.getInstance(document.getElementById('createBookingModal'));
+    if(modalInstance) modalInstance.hide();
+    return;
+  }
 
   try {
     const res = await fetch('/api/bookings', {
@@ -361,7 +348,7 @@ async function handleCreateBooking(event) {
 }
 
 // ---= MASTER EVENT LISTENER (Single source of truth) =---
-document.addEventListener('DOMContentLoaded', async function() { // Made async
+document.addEventListener('DOMContentLoaded', async function() {
   console.log("Attaching event listeners...");
 
   await setupUserInfo(); // Wait for user info
@@ -385,3 +372,4 @@ document.addEventListener('DOMContentLoaded', async function() { // Made async
   // Load initial view
   showMyBookingsView();
 });
+
