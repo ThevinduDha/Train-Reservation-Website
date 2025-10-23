@@ -16,31 +16,33 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // disable CSRF during development/testing; enable/adjust for production
                 .csrf(csrf -> csrf.disable())
-
-                // Authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        // static assets MUST be first to be allowed
+                        // 1. Static Assets (Public) - Must be first
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // 2. Public API Endpoints (Login/Register + Public Data)
+                        .requestMatchers("/api/auth/**", "/api/schedules", "/api/trains", "/api/stations").permitAll()
+
+                        // 3. Public Pages (HTML served by ViewController)
                         .requestMatchers("/", "/login", "/signup", "/admin").permitAll()
 
-                        // admin UI (dashboard) and admin API require ADMIN role
+                        // 4. Admin API & Pages (Requires ADMIN Role)
                         .requestMatchers("/admin/dashboard", "/api/admin/**").hasRole("ADMIN")
 
-                        // passenger dashboard requires authentication
-                        .requestMatchers("/passenger/dashboard", "/api/bookings/**", "/api/users/me").authenticated()
+                        // 5. Passenger Page & Ticket Page (Requires Authentication)
+                        .requestMatchers("/passenger/dashboard", "/ticket").authenticated()
 
-                        // everything else requires authentication
+                        // 6. ALL OTHER /api/** endpoints require authentication
+                        // This covers /api/users/me, /api/bookings/**, etc.
+                        .requestMatchers("/api/**").authenticated()
+
+                        // 7. Any other request requires authentication (Fallback)
                         .anyRequest().authenticated()
                 )
-                // When an unauthenticated user tries to open a protected page, redirect to your custom login page
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
                 )
-
-                // allow POST /api/auth/logout to be used for logout
                 .logout(logout -> logout
                         .logoutUrl("/api/auth/logout")
                         .permitAll()
@@ -49,13 +51,11 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // expose AuthenticationManager (used by your AuthController)
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // password encoder for registering users
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
