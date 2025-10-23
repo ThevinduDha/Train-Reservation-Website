@@ -453,3 +453,172 @@ body {
 .search-panel label {
   font-weight: 500;
 }
+
+/*
+================================
+New Passenger Dashboard Layout
+================================
+*/
+.passenger-sidebar {
+  background: linear-gradient(180deg, #0d6efd 0%, #0a58ca 100%);
+}
+.passenger-sidebar .sidebar-header .brand-text {
+  color: #fff;
+}
+.passenger-sidebar .sidebar-nav a {
+  color: rgba(255, 255, 255, 0.7);
+}
+.passenger-sidebar .sidebar-nav a:hover,
+.passenger-sidebar .sidebar-nav a.active {
+  background-color: rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+}
+.passenger-sidebar .sidebar-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Override for main content to use the background image */
+.main-content {
+  background-image: url('../images/dashboard-hero.jpg');
+  color: white;
+}
+.main-content::before {
+  background-color: rgba(0,0,0,0.5);
+}
+.main-content .form-label { /* Make form labels white */
+  color: white;
+}
+
+/*
+================================
+Refined Passenger Dashboard Layout
+================================
+*/
+
+/* New Dark Sidebar Theme */
+.passenger-sidebar-dark {
+  background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%); /* Dark slate gradient */
+}
+.passenger-sidebar-dark .sidebar-header .brand-text { color: #fff; }
+.passenger-sidebar-dark .sidebar-nav a { color: rgba(255, 255, 255, 0.7); }
+.passenger-sidebar-dark .sidebar-nav a:hover,
+.passenger-sidebar-dark .sidebar-nav a.active {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+}
+.passenger-sidebar-dark .sidebar-footer { border-top: 1px solid rgba(255, 255, 255, 0.2); }
+
+/* New Wide Search Bar Container */
+.wide-search-container {
+  max-width: 100%;
+}
+.wide-search-container h2 {
+  font-weight: 700;
+}
+.wide-search-container .glass-card {
+  max-width: 100%; /* Override small card width */
+}
+.wide-search-container .form-control {
+  padding: 0.75rem 1rem; /* Taller inputs */
+  font-size: 1rem;
+}
+
+/* Ensure glass-card exists and has max-width: 100% for dashboard panels */
+.glass-card {
+  width: 100%;
+  max-width: 100%; /* Important for dashboard panels */
+  border-radius: 16px;
+  padding: 1.5rem; /* More padding for panels */
+  background: rgba(255,255,255,0.15); /* Adjust opacity as needed */
+  -webkit-backdrop-filter: blur(10px) saturate(110%);
+  backdrop-filter: blur(10px) saturate(110%);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: white; /* Ensure text inside is white */
+}
+.glass-card h2, .glass-card h3, .glass-card h4, .glass-card h5 { color: white; }
+.glass-card .text-muted { color: rgba(255,255,255,0.7) !important; }
+.glass-card .alert-info { background-color: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;}
+
+/* Styles for Wide Search Bar */
+.wide-search-container h2 { font-weight: 700; }
+.wide-search-container .form-control { padding: 0.75rem 1rem; font-size: 1rem; }
+
+/* Booking Card specific styles for better visibility */
+.booking-card {
+  background: rgba(0,0,0,0.3); /* Slightly darker background for cards */
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.booking-card .muted-small { color: rgba(255,255,255,0.8); }
+
+/* Ensure list items in results/directory are styled */
+.list-group-item {
+  background-color: transparent !important;
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/*
+================================
+Refined Passenger Dashboard Layout
+================================
+*/
+
+/* New Dark Sidebar Theme */
+.passenger-sidebar-dark {
+  background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%); /* Dark slate gradient */
+}
+.passenger-sidebar-dark .sidebar-header .brand-text { color: #fff; }
+.passenger-sidebar-dark .sidebar-nav a { color: rgba(255, 255, 255, 0.7); }
+.passenger-sidebar-dark .sidebar-nav a:hover,
+.passenger-sidebar-dark .sidebar-nav a.active {
+  background-color: rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+}
+.passenger-sidebar-dark .sidebar-footer { border-top: 1px solid rgba(255, 255, 255, 0.2); }
+
+/* New Wide Search Bar Container */
+.wide-search-container {
+  max-width: 100%;
+}
+.wide-search-container h2 {
+  font-weight: 700;
+}
+.wide-search-container .glass-card {
+  max-width: 100%; /* Override small card width */
+}
+.wide-search-container .form-control {
+  padding: 0.75rem 1rem; /* Taller inputs */
+  font-size: 1rem;
+}
+
+/* Ensure glass-card has max-width: 100% for dashboard panels */
+.glass-card {
+  width: 100%;
+  max-width: 100%; /* Important for dashboard panels */
+  border-radius: 16px;
+  padding: 1.5rem; /* More padding for panels */
+  background: rgba(255,255,255,0.15); /* Adjust opacity as needed */
+  -webkit-backdrop-filter: blur(10px) saturate(110%);
+  backdrop-filter: blur(10px) saturate(110%);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: white; /* Ensure text inside is white */
+}
+.glass-card h2, .glass-card h3, .glass-card h4, .glass-card h5 { color: white; }
+.glass-card .text-muted { color: rgba(255,255,255,0.7) !important; }
+.glass-card .alert-info { background-color: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;}
+
+/* Booking Card specific styles for better visibility */
+.booking-card {
+  background: rgba(0,0,0,0.3); /* Slightly darker background for cards */
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.booking-card .muted-small { color: rgba(255,255,255,0.8); }
+
+/* Ensure list items in results/directory are styled */
+.list-group-item {
+  background-color: transparent !important;
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
