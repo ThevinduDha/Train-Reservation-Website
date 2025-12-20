@@ -4,8 +4,7 @@ LankaRail is a full-stack, database-driven web application built with Java Sprin
 
 This project was built from the ground up, focusing on a secure REST API backend, a clean and responsive frontend, and the practical application of core software design patterns.
 
-![Passenger Dashboard Screenshot](https://i.imgur.com/your-screenshot-url.jpg)
-*(**Suggestion:** Replace this URL with a link to one of your best screenshots. `image_1aff05.jpg` or `image_d2b0d7.jpg` would be perfect!)*
+
 
 ---
 
@@ -118,3 +117,4 @@ The application is secured with three levels of validation:
 ### 3. Access the Application
 * **Passenger Portal:** `http://localhost:8080/`
 * **Admin Portal:** `http://localhost:8080/admin`
+
