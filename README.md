@@ -208,4 +208,16 @@ Static Resource Caching for assets
 
 ---
 
+### 👨‍💻 Author
+<div align="center">
+Thevindu Dharmadasa
+Full-Stack Developer & Software Architect
+
+https://img.shields.io/badge/GitHub-ThevinduD-181717?style=for-the-badge&logo=github
+https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin
+https://img.shields.io/badge/Portfolio-Visit-00C7B7?style=for-the-badge&logo=netlify
+https://img.shields.io/badge/Email-Contact-D14836?style=for-the-badge&logo=gmail
+
+---
+
 
